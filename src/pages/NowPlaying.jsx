@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import MovieCard from '../components/MovieCard'
+import './NowPlaying.css'
 
 const apiUrl = import.meta.env.VITE_API_URL
 

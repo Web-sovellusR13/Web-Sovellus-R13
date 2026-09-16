@@ -17,4 +17,20 @@ const getNowPlayingMovies = async () => {
     return response.data
 }
 
-export { getNowPlayingMovies }
+const getMovieById = async (movieId) => {
+    const response = await axios.get(
+        `https://api.themoviedb.org/3/movie/${movieId}`,
+        {
+            headers: {
+                Authorization: `Bearer ${process.env.TMDB_TOKEN}`
+            },
+            params: {
+                language: 'en-US'
+            }
+        }
+    )
+
+    return response.data
+}
+
+export { getNowPlayingMovies, getMovieById }

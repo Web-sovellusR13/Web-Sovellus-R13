@@ -1,8 +1,9 @@
 import { Router } from 'express'
-import { getNowPlaying } from '../controllers/MovieController.js'
+import { getNowPlaying, getMovie } from '../controllers/MovieController.js'
 
 const router = Router()
 
 router.get('/now-playing', getNowPlaying)
+router.get('/:id', getMovie)
 
 export default router

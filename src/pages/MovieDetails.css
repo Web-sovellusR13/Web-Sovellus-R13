@@ -1,0 +1,19 @@
+.movie-details {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.details-poster {
+    width: 300px;
+    height: 450px;
+    object-fit: cover;
+}
+
+.movie-info {
+    max-width: 600px;
+}
+
+.movie-info h1 {
+    margin-top: 0;
+}

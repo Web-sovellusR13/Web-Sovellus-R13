@@ -8,6 +8,7 @@ import UserProvider from './context/UserProvider.jsx'
 import { RouterProvider } from 'react-router-dom' 
 import { createBrowserRouter } from "react-router-dom"; 
 import NotFound from "./screens/NotFound"; 
+import MovieDetails from './pages/MovieDetails'
 
 const router = createBrowserRouter([ 
   { 
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
       { 
         path: "/", 
         element: <App />, 
+      },
+      {
+        path: "/movies/:id",
+        element: <MovieDetails />,
       } 
     ] 
   } 
