@@ -41,6 +41,16 @@ export default function Authentication({authenticationMode}) {
       <div>
         <h3>{authenticationMode === AuthenticationMode.SignIn ? 'Sign in' : 'Sign up'}</h3> 
         <form onSubmit={handleSubmit} className='login-form'> 
+          {authenticationMode === AuthenticationMode.SignUp && (
+          <>
+            <label>Username</label>
+            <input
+              placeholder="Username"
+              value={user.username || ""}
+              onChange={e => setUser({...user,username: e.target.value})}  
+            />
+          </>
+        )}
           <label>Email</label> 
           <input  
             placeholder='Email'  
@@ -59,6 +69,7 @@ export default function Authentication({authenticationMode}) {
           <button type='submit'>{authenticationMode === AuthenticationMode.SignIn ? 'Login' : 'Submit'}</button> 
         </form> 
       </div> 
+
     </div> 
   )
 }

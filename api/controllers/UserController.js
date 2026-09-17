@@ -1,7 +1,7 @@
 import { ApiError } from '../helper/ApiError.js' 
-import { compare, hash } from 'bcrypt' 
+import { compare, hash, } from 'bcrypt' 
 import jwt from 'jsonwebtoken' 
-import { getUserByEmail, deleteUser } from '../models/User.js'
+import { getUserByEmail, addNewUser, deleteUser  } from '../models/User.js'
 
 const { sign } = jwt 
  
@@ -51,4 +51,23 @@ const deleteAccount = async (req, res) => {
   })
 }
  
-export { signin, deleteAccount } 
+const signup = async (req, res, next) => {
+  try{
+    const email = req.body.user?.email?.trim().toLowerCase()
+    const username = req.body.user?.username?.trim().toLowerCase()
+    const password = req.body.user?.password
+    if (!email || !username || !password) {
+      const error = new Error('Please fill up all the fields.')
+      error.status = 400
+      console.log(error)
+      return next(error)
+    }
+    const result = await addNewUser(username, email, password)
+    return res.status(201).json(result.rows[0])
+  } catch (error)  {
+    console.log(error)
+    return  next(error)
+  }
+}
+
+export { signin, signup, deleteAccount } 
