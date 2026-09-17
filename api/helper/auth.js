@@ -10,7 +10,7 @@ const auth = (req, _res, next) => {
     return next(error) 
   } 
   try { 
-    req.user = verify(token, process.env.JWT_SECRET_KEY) 
+    req.user = verify(token, process.env.JWT_SECRET) 
     return next() 
   } catch { 
     return next(new ApiError('Invalid or expired token', 401)) 

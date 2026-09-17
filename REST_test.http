@@ -1,0 +1,30 @@
+@baseUrl = http://localhost:3000
+@token = YOUR_TOKEN_HERE
+
+### Login
+POST {{baseUrl}}/api/user/signin
+Content-Type: application/json
+
+{
+  "user": {
+    "email": "test@test.com",
+    "password": "test"
+  }
+}
+
+###
+
+### Delete current user
+DELETE {{baseUrl}}/api/user/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoidGVzdEB0ZXN0LmNvbSIsImlhdCI6MTc4OTY0MjY4MywiZXhwIjoxNzg5NjQ2MjgzfQ.oolaxngEVicGTI0Mx50NDHwBCGy0MEYUpP5Xn8fSwlk
+
+###
+
+### Delete without authentication
+DELETE {{baseUrl}}/api/users/me
+
+###
+
+### Delete with invalid token
+DELETE {{baseUrl}}/api/users/me
+Authorization: Bearer invalid-token

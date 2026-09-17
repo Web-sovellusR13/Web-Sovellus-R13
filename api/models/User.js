@@ -9,6 +9,13 @@ const getUserByEmail = async (email) => {
   return result
 }
 
+const deleteUser = async (userId) => {
+  const result = await pool.query(
+    'DELETE FROM app_users WHERE "userID" = $1 RETURNING *', [userId]
+  )
+  return result.rows[0]
+}
+
 
 const addNewUser = async (username, email, password) => {
   const hashedPassword = await hash(password, 10)
@@ -18,4 +25,4 @@ const addNewUser = async (username, email, password) => {
   return result
 }
 
-export { getUserByEmail, addNewUser }
+export { getUserByEmail, addNewUser, deleteUser }
