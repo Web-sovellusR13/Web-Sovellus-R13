@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import Header from "../components/Header.js";
 import axios from 'axios';
-import '../styles/Group.css';
+import './group.css';
 
 function Group() {
 
