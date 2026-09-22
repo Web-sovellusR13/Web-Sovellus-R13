@@ -3,6 +3,7 @@ import { useUser } from "./context/useUser"
 import axios from 'axios'
 import './App.css'
 import NowPlaying from './pages/NowPlaying'
+import RandomMovie from './pages/RandomMovie'
 import Searchbar from './searchBar/searchBar'
 import { useNavigate } from "react-router-dom" 
 
@@ -30,7 +31,8 @@ function App() {
     main: <Main/>,
     search: <Searchbar/>,
     groups: <Groups/>, // Replace this with the Groups component, when it is ready.
-    profile: <Profile/> // Replace this with the Profile component, when it is ready.
+    profile: <Profile/>, // Replace this with the Profile component, when it is ready.
+    randomMovie: <RandomMovie/>
   }
 
   const signin = () => { 
@@ -51,6 +53,9 @@ function App() {
         </button>
         <button onClick={() => setPage("profile")}>
           Profile
+        </button>
+        <button onClick={() => setPage("randomMovie")}>
+          Random Movie
         </button>
         {(!user || !user.token) &&
           (
