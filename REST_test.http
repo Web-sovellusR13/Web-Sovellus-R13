@@ -14,6 +14,9 @@ Content-Type: application/json
 
 ###
 
+GET {{baseUrl}}/api/user/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjIsImVtYWlsIjoidGVzdEB0ZXN0LmNvbSIsImlhdCI6MTc5MDE0NzU2MSwiZXhwIjoxNzkwMTUxMTYxfQ.84PWC9hFC7KDY5VK4KHeExdqMzg-wtsJv7G5_cTiENs
+
 ### Delete current user
 DELETE {{baseUrl}}/api/user/me
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoidGVzdEB0ZXN0LmNvbSIsImlhdCI6MTc4OTY0MjY4MywiZXhwIjoxNzg5NjQ2MjgzfQ.oolaxngEVicGTI0Mx50NDHwBCGy0MEYUpP5Xn8fSwlk
