@@ -1,0 +1,6 @@
+.profile-buttons {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}

@@ -9,6 +9,14 @@ const getUserByEmail = async (email) => {
   return result
 }
 
+const getUserById = async (userId) => {
+  const result = await pool.query(
+    'SELECT "userID", username, email FROM public.app_users WHERE "userID" = $1',
+    [userId]
+  )
+  return result
+}
+
 const deleteUser = async (userId) => {
   const result = await pool.query(
     'DELETE FROM app_users WHERE "userID" = $1 RETURNING *', [userId]
@@ -25,4 +33,4 @@ const addNewUser = async (username, email, password) => {
   return result
 }
 
-export { getUserByEmail, addNewUser, deleteUser }
+export { getUserByEmail, addNewUser, deleteUser, getUserById }
