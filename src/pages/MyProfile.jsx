@@ -4,7 +4,7 @@ import axios from 'axios'
 import './MyProfile.css'
 
 
-function MyProfile() {
+function MyProfile({ setPage }) {
     const { user, setUser } = useUser()
     const [profile, setProfile] = useState(null)
     const [error, setError] = useState("")
@@ -12,6 +12,7 @@ function MyProfile() {
     const logout = () => {
     setUser({ email: '', password: '' })
     sessionStorage.removeItem('user')
+    setPage("main")
     }
 
     const deleteAccount = async () => {
@@ -32,9 +33,10 @@ function MyProfile() {
             }
         }
     )
-
+        window.alert("Account deleted successfully")
         setUser({ email: '', password: '' })
         sessionStorage.removeItem('user')
+        setPage("main")
     } catch (error) {
         console.error(error)
         setError("Account could not be deleted.")
@@ -63,19 +65,15 @@ function MyProfile() {
     if (user?.token) {
       getProfile()
     }
-  }, [user])
+    }, [user])
 
-  if (!user?.token) {
-    return <p>"Logout successful."</p>
-  }
+    if (error) {
+        return <p>{error}</p>
+    }
 
-  if (error) {
-    return <p>{error}</p>
-  }
-
-  if (!profile) {
-    return <p>Loading...</p>
-  }
+    if (!profile) {
+        return <p>Loading...</p>
+    }
 
   return (
     <div>

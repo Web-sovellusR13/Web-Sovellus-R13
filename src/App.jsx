@@ -27,7 +27,7 @@ function App() {
     main: <Main/>,
     search: <Searchbar/>,
     groups: <Groups/>, // Replace this with the Groups component, when it is ready.
-    profile: <MyProfile/> // Replace this with the Profile component, when it is ready.
+    profile: <MyProfile setPage={setPage}/> 
   }
 
   const signin = () => { 
