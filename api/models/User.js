@@ -18,10 +18,39 @@ const getUserById = async (userId) => {
 }
 
 const deleteUser = async (userId) => {
-  const result = await pool.query(
-    'DELETE FROM app_users WHERE "userID" = $1 RETURNING *', [userId]
-  )
-  return result.rows[0]
+  const client = await pool.connect()
+
+  try {
+    await client.query('BEGIN')
+
+    // Delete user's favorites
+    await client.query(
+      'DELETE FROM favorites WHERE "userID" = $1',
+      [userId]
+    )
+
+    // Delete user's reviews
+    await client.query(
+      'DELETE FROM reviews WHERE "userID" = $1',
+      [userId]
+    )
+
+    // Delete user
+    const result = await client.query(
+      'DELETE FROM app_users WHERE "userID" = $1 RETURNING *',
+      [userId]
+    )
+
+    await client.query('COMMIT')
+
+    return result.rows[0]
+
+  } catch (error) {
+    await client.query('ROLLBACK')
+    throw error
+  } finally {
+    client.release()
+  }
 }
 
 
