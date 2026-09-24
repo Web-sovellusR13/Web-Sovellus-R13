@@ -1,7 +1,7 @@
 import { ApiError } from '../helper/ApiError.js' 
 import { compare, hash, } from 'bcrypt' 
 import jwt from 'jsonwebtoken' 
-import { getUserByEmail, addNewUser, deleteUser  } from '../models/User.js'
+import { getUserByEmail, addNewUser, deleteUser, getUserById  } from '../models/User.js'
 
 const { sign } = jwt 
  
@@ -34,7 +34,30 @@ const signin = async (req, res,next) => {
     console.log(error);
     return next(error) 
   } 
-} 
+}
+
+const getMyProfile = async (req, res, next) => {
+  try {
+    const userId = req.user.userId
+
+    const result = await getUserById(userId)
+    const user = result.rows[0]
+
+    if (!user) {
+      const error = new Error('User not found')
+      error.status = 404
+      return next(error)
+    }
+
+    return res.status(200).json({
+      userID: user.userID,
+      username: user.username,
+      email: user.email
+    })
+  } catch (error) {
+    return next(error)
+  }
+}
 
 const deleteAccount = async (req, res) => {
 
@@ -72,4 +95,4 @@ const signup = async (req, res, next) => {
   }
 }
 
-export { signin, signup, deleteAccount } 
+export { signin, signup, deleteAccount, getMyProfile } 
