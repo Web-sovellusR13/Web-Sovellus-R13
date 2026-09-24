@@ -6,6 +6,7 @@ import NowPlaying from './pages/NowPlaying'
 import RandomMovie from './pages/RandomMovie'
 import Searchbar from './searchBar/searchBar'
 import { useNavigate } from "react-router-dom" 
+import MyProfile from './pages/MyProfile'
 
 // NOTE: This should probably be moved to its own file, if we decide to add more content into the main page.
 function Main() {
@@ -17,10 +18,6 @@ function Groups() {
   return <div>Groups content</div>;
 }
 
-// Placeholder Profile component.
-function Profile() {
-  return <div>Profile content.</div>;
-}
 
 function App() {
   const [page, setPage] = useState("main");
@@ -31,8 +28,8 @@ function App() {
     main: <Main/>,
     search: <Searchbar/>,
     groups: <Groups/>, // Replace this with the Groups component, when it is ready.
-    profile: <Profile/>, // Replace this with the Profile component, when it is ready.
-    randomMovie: <RandomMovie/>
+    randomMovie: <RandomMovie/>,
+    profile: <MyProfile setPage={setPage}/> 
   }
 
   const signin = () => { 
@@ -54,9 +51,11 @@ function App() {
         <button onClick={() => setPage("randomMovie")}>
           Random Movie
         </button>
+        {user && user.token && (
         <button onClick={() => setPage("profile")}>
-          Profile
+        My Profile
         </button>
+        )}
         {(!user || !user.token) &&
           (
             <button onClick={signin}>
