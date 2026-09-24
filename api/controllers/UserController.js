@@ -59,13 +59,15 @@ const signup = async (req, res, next) => {
     if (!email || !username || !password) {
       const error = new Error('Please fill up all the fields.')
       error.status = 400
-      console.log(error)
       return next(error)
-    }
+    } 
     const result = await addNewUser(username, email, password)
     return res.status(201).json(result.rows[0])
   } catch (error)  {
-    console.log(error)
+    if (error.code === '23505') {
+      error.status = 409
+      error.message = 'Username  or email is already in use'
+    }
     return  next(error)
   }
 }
