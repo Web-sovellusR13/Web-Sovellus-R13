@@ -22,18 +22,6 @@ function RandomMovie() {
       })
   }, [])
 
-  //useEffect(() => {
-  //    axios.get(`${apiUrl}/api/movies/random`)
-  //        .then(response => {
-  //            setMovies(response.data.results)
-  //            setLoading(false)
-  //        })
-  //        .catch(error => {
-  //            alert(error.response ? error.response.data : error)
-  //            setLoading(false)
-  //        })
-  //}, [])
-
   const handleSubmit = (e) => {
     e.preventDefault() 
 
