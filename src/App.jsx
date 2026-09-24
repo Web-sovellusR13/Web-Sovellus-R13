@@ -51,11 +51,11 @@ function App() {
         <button onClick={() => setPage("groups")}>
           Groups
         </button>
-        <button onClick={() => setPage("profile")}>
-          Profile
-        </button>
         <button onClick={() => setPage("randomMovie")}>
           Random Movie
+        </button>
+        <button onClick={() => setPage("profile")}>
+          Profile
         </button>
         {(!user || !user.token) &&
           (
