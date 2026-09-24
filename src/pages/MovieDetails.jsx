@@ -1,11 +1,39 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useUser } from '../context/useUser'
 import axios from 'axios'
 import './MovieDetails.css'
+import { ApiError } from '../../api/helper/ApiError.js'
 
 const apiUrl = import.meta.env.VITE_API_URL
 
 function MovieDetails() {
+    const { user } = useUser()
+
+    const addFavorite = async () => {
+        try {
+            const response = await axios.post(`${apiUrl}/api/favorites`,{
+                movieID: movie.id
+            },
+            {
+                headers: {'Authorization': `Bearer ${user.token}`}
+            })
+
+            if (response.status === 201) {
+                alert('Movie added to favorites successfully')
+            }
+
+        } catch (error) {
+            if (error.response?.status === 401) {
+                alert('Please sign in to add favorites')
+            } else if (error.response?.data?.error?.message) {
+                alert(error.response.data.error.message)
+            } else {
+                alert(error)
+            }
+        }
+    } 
+    
     const { id } = useParams()
     const navigate = useNavigate()
 
@@ -48,6 +76,9 @@ function MovieDetails() {
                     <p>Genres: {movie.genres.map(genre => genre.name).join(', ')}</p>
                     <h2>Overview</h2>
                     <p>{movie.overview}</p>
+                    <button onClick={addFavorite}>
+                        Add favorite
+                    </button>
                 </div>
             </div>
         </div>

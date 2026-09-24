@@ -116,9 +116,6 @@ ALTER TABLE IF EXISTS public.requests
     ON DELETE NO ACTION
     NOT VALID;
 
-ALTER TABLE public.reviews
-	ADD CONSTRAINT chk_rating_range
-	CHECK (rating >= 0 AND rating <= 10);
 
 ALTER TABLE requests
 	ADD CONSTRAINT chk_request_status
