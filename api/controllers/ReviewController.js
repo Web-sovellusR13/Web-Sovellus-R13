@@ -1,7 +1,7 @@
-import { createReview } from "../models/Review.js";
+import { createReview, getReviewsByMovieId } from "../models/Review.js";
 import { ApiError } from "../helper/ApiError.js";
 
-const addReview = async (req, res,next) => {
+const addReview = async (req, res, next) => {
     try{
         const userID = req.user.userId
         const movieID = req.body.movieID
@@ -26,4 +26,15 @@ const addReview = async (req, res,next) => {
     }
 }
 
-export { addReview }
+const getReviews = async (req, res, next) => {
+    try{
+        const movieID = req.params.movieID
+        
+        const result = await getReviewsByMovieId(movieID)
+        return res.status(201).json(result)
+    } catch (error){
+        return next(error)
+    }
+}
+
+export { addReview, getReviews }
