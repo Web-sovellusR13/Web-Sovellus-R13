@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import MovieCard from '../components/MovieCard'
-import './NowPlaying.css'
+import './RandomMovie.css'
 
 const apiUrl = import.meta.env.VITE_API_URL
 
@@ -43,45 +43,41 @@ function RandomMovie() {
   }
 
   return (
-    <div>
-      <h1>Random Movie</h1>
+    <div className="random-movie-container">
+      <form onSubmit={handleSubmit}>
+        <label>Genre: </label>
+        <select
+          id="genre"
+          onChange={e => setSelectedGenre(e.target.value)}
+        >
+          <option>Not selected</option>
+          {genres.map(genre => (
+            <option
+              key={genre.id}
+              value={genre.id}
+            >
+              {genre.name}
+            </option>
+          ))}
+        </select><br></br>
 
-      <div>
-        <form onSubmit={handleSubmit}>
-          <label>Genre: </label>
-          <select
-            id="genre"
-            onChange={e => setSelectedGenre(e.target.value)}
-          >
-            <option>Not selected</option>
-            {genres.map(genre => (
-              <option
-                key={genre.id}
-                value={genre.id}
-              >
-                {genre.name}
-              </option>
-            ))}
-          </select><br></br>
+        <label>Year: </label>
+        <input
+          type="number"
+          onChange={e => setSelectedYear(e.target.value)}
+          id="year"
+        /><br></br>
+        <button type="submit" value="Submit">Submit</button>
+      </form>
 
-          <label>Year: </label>
-          <input
-            type="number"
-            onChange={e => setSelectedYear(e.target.value)}
-            id="year"
-          /><br></br>
-          <input type="submit" value="Submit"/>
-        </form>
-
-        {(movie) &&
-          (
-            <MovieCard
-              key={movie.id}
-              movie={movie}
-            />
-          )
-        }
-      </div>
+      {(movie) &&
+        (
+          <MovieCard
+            key={movie.id}
+            movie={movie}
+          />
+        )
+      }
     </div>
   )
 }
