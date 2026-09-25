@@ -22,8 +22,18 @@ function Groups() {
 function App() {
   const [page, setPage] = useState("main");
   const [isHamburgerMenuOpen, setIsHamburgerMenuOpen] = useState(false);
+  const [width, setWidth] = useState(window.innerWidth);
   const navigate = useNavigate() 
   const { user } = useUser() 
+
+
+  useEffect(() => {
+      const handleResize = () => setWidth(window.innerWidth);
+
+      window.addEventListener("resize", handleResize);
+
+      return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const pages = {
     main: <Main/>,
@@ -46,31 +56,33 @@ function App() {
           ☰
       </button>
 
-      <nav className={isHamburgerMenuOpen ? "hamburger-menu" : "menu"}>
-        <button onClick={() => setPage("main")}>
-          Main
-        </button>
-        <button onClick={() => setPage("search")}>
-          Search
-        </button>
-        <button onClick={() => setPage("groups")}>
-          Groups
-        </button>
-        <button onClick={() => setPage("randomMovie")}>
-          Random Movie
-        </button>
-        {user && user.token && (
-        <button onClick={() => setPage("profile")}>
-        My Profile
-        </button>
-        )}
-        {(!user || !user.token) &&
-          (
-            <button onClick={signin}>
-              Signin
-            </button>
+      {(isHamburgerMenuOpen || width > 768) &&
+        (<nav className="menu">
+          <button onClick={() => setPage("main")}>
+            Main
+          </button>
+          <button onClick={() => setPage("search")}>
+            Search
+          </button>
+          <button onClick={() => setPage("groups")}>
+            Groups
+          </button>
+          <button onClick={() => setPage("randomMovie")}>
+            Random Movie
+          </button>
+          {user && user.token && (
+          <button onClick={() => setPage("profile")}>
+          My Profile
+          </button>
           )}
-      </nav>
+          {(!user || !user.token) &&
+            (
+              <button onClick={signin}>
+                Signin
+              </button>
+            )}
+        </nav>
+      )}
 
       <main>
         {pages[page]}
