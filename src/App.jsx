@@ -21,6 +21,7 @@ function Groups() {
 
 function App() {
   const [page, setPage] = useState("main");
+  const [isHamburgerMenuOpen, setIsHamburgerMenuOpen] = useState(false);
   const navigate = useNavigate() 
   const { user } = useUser() 
 
@@ -38,7 +39,14 @@ function App() {
 
   return (
     <div className="menu-container">
-      <nav className="menu">
+
+      <button class="hamburger" onClick={() => {
+        isHamburgerMenuOpen ? setIsHamburgerMenuOpen(false) : setIsHamburgerMenuOpen(true)
+      }}>
+          ☰
+      </button>
+
+      <nav className={isHamburgerMenuOpen ? "hamburger-menu" : "menu"}>
         <button onClick={() => setPage("main")}>
           Main
         </button>
@@ -63,6 +71,7 @@ function App() {
             </button>
           )}
       </nav>
+
       <main>
         {pages[page]}
       </main>
