@@ -4,28 +4,28 @@ import { Link } from 'react-router-dom'
 import './GroupList.css'
 import Header from "../components/Header.js"
 
+const apiUrl = import.meta.env.VITE_API_URL
 
 function GroupList() {
     const [groups, setGroups] = useState([])
 
     useEffect(() => {
-        //const currentGroups = getGroups()
-        //setGroups(currentGroups)
-
-        axios.get(url + '/getGroups')
-        .then(response => {
-            setGroups(response.data)
-        }).catch(error => {
-            alert(error.response.data.error ? error.response.data.error : error)
-        })
-    }, []);
+        axios.get(`${apiUrl}/getGroups`)
+            .then(response => {
+                setGroups(response.data)
+            })
+            .catch(error => {
+                console.error('Error fetching groups:', error)
+                alert(error.response?.data?.error || error.message || 'Failed to load groups')
+            })
+    }, [])
 
     return (
         <div className='groupList'>
             <Header />
 
             <div className='myHeader'>
-                <a href='/createGroup'>Create a group</a>
+                <Link to='/createGroup'>Create a group</Link>
                 <h1>Your groups</h1>
                 <div className='groupContainer'>
                     {groups.map(group => (
@@ -39,7 +39,7 @@ function GroupList() {
                 </div>
             </div>
         </div>
-    );
+    )
 }
 
-export default GroupList;
+export default GroupList
