@@ -1,4 +1,4 @@
-import { addNewFavorite } from '../models/favorite.js'
+import { addNewFavorite, selectAllFavorites } from '../models/favorite.js'
 
 const addFavorite = async (req, res, next) => {
     try {
@@ -11,11 +11,20 @@ const addFavorite = async (req, res, next) => {
     } catch (error) {
         if (error.code === '23505') {
             const error =  new Error('The movie is already in your favorites')
-            error.status = 409
             return next(error)
         }
         return next(error)
     }
 }
 
-export { addFavorite }
+const getFavorites = async (req, res, next) => {
+    try {
+        const { userID } = req.params
+        const result  = await selectAllFavorites(userID)
+        return res.status(200).json(result.rows || [])
+    } catch (error) {
+        return  next(error)
+    }
+}
+
+export { addFavorite, getFavorites }
