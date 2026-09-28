@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { signin, signup, deleteAccount } from '../controllers/UserController.js'
 import { signin, signup, deleteAccount, getMyProfile } from '../controllers/UserController.js'
 import { auth } from '../helper/auth.js'
 
