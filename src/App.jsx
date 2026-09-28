@@ -43,7 +43,6 @@ function App() {
     groups: <GroupList/>, // Replace this with the Groups component, when it is ready.
     createGroup: <CreateGroup/>,
     profile: <Profile/> // Replace this with the Profile component, when it is ready.
-    groups: <Groups/>, // Replace this with the Groups component, when it is ready.
     randomMovie: <RandomMovie/>,
     profile: <MyProfile setPage={setPage}/> 
   }
