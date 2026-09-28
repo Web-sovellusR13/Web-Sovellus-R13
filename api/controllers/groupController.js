@@ -14,12 +14,11 @@ export const getGroups = async (req, res, next) => {
     next(error)
   }
 }
-
 export const getGroupById = async (req, res, next) => {
   const { id } = req.params
 
   try {
-    const result = await pool.query(
+    const groupResult = await pool.query(
       `
       SELECT 
         g."groupID" AS "idGroup", 
@@ -33,16 +32,42 @@ export const getGroupById = async (req, res, next) => {
       [id]
     )
 
-    if (result.rows.length === 0) {
+    if (groupResult.rows.length === 0) {
       return res.status(404).json({ error: 'Group not found' })
     }
 
-    res.status(200).json(result.rows[0])
+    const groupData = groupResult.rows[0]
+
+    const membersResult = await pool.query(
+      `
+      SELECT 
+        u."userID", 
+        u.username 
+      FROM public.members m
+      JOIN public.app_users u ON m."user_userID" = u."userID"
+      WHERE m."groups_groupID" = $1
+      `,
+      [id]
+    )
+
+    const moviesResult = await pool.query(
+      `
+      SELECT "movieID" 
+      FROM public.group_movies 
+      WHERE "groupID" = $1
+      `,
+      [id]
+    )
+
+    res.status(200).json({
+      ...groupData,
+      members: membersResult.rows,
+      movies: moviesResult.rows.map(m => m.movieID)
+    })
   } catch (error) {
     next(error)
   }
 }
-
 export const createGroup = async (req, res, next) => {
   const { groupName, ownerID } = req.body
 
@@ -59,7 +84,6 @@ export const createGroup = async (req, res, next) => {
       `,
       [groupName, ownerID]
     )
-
     await pool.query(
       `
       INSERT INTO public.members ("user_userID", "groups_groupID")

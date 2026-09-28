@@ -32,7 +32,7 @@ function GroupList() {
                     {groups.map(group => (
                         <div key={group.idGroup} className='groupItem'>
                             <h2>{group.groupName}</h2>
-                            <Link to={`/group/${group.idGroup}`}>Join group chat</Link>
+                            <Link to={`/group/${group.idGroup}`}>Open Group</Link>
                         </div>
                     ))}
                 </div>

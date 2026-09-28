@@ -1,132 +1,90 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
-import Header from '../components/Header';
-import './group.css';
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import "./group.css";
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
-function Group() {
-    const { groupId } = useParams();
-    const [group, setGroup] = useState({});
-
-    const [messages, setMessages] = useState([]);
-    const [currentMessage, setCurrentMessage] = useState('');
-    const [username, setUsername] = useState('testUser');
-    const [image, setImage] = useState('');
-    const [groupName, setGroupName] = useState('My group');
+function GroupPage() {
+    const { id } = useParams();
+    const [group, setGroup] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
     useEffect(() => {
-        axios.get(`${apiUrl}/group/${groupId}`)
+        axios.get(`${apiUrl}/api/groups/${id}`)
             .then(response => {
-                console.log('Group data:', response.data);
-                const groupData = response.data;
-                setGroup(groupData);
-                setImage(groupData.groupImage || '');
-                setGroupName(groupData.groupName || 'My group');
+                setGroup(response.data);
             })
-            .catch(error => {
-                console.error('Error fetching group data:', error);
-            });
-    }, [groupId]);
-
-    useEffect(() => {
-        axios.get(`${apiUrl}/group/${groupId}/messages`)
-            .then(response => {
-                setMessages(response.data);
+            .catch(err => {
+                console.error("Error fetching group page:", err);
+                const apiError = err.response?.data;
+                if (typeof apiError === 'object' && apiError !== null) {
+                    setError(apiError.message || apiError.error || JSON.stringify(apiError));
+                } else if (typeof apiError === 'string') {
+                    setError(apiError);
+                } else {
+                    setError(err.message || "Failed to fetch group details");
+                }
             })
-            .catch(error => {
-                console.error('Error fetching messages:', error);
+            .finally(() => {
+                setLoading(false);
             });
-    }, [groupId]);
+    }, [id]);
 
-    const handleInputChange = (e) => {
-        setCurrentMessage(e.target.value);
-    };
+    if (loading) return <div className="groupPageContainer">Loading group...</div>;
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (currentMessage.trim() !== '') {
-            const newMessage = {
-                username: username,
-                text: currentMessage
-            };
-
-            axios.post(`${apiUrl}/group/${groupId}/message`, newMessage)
-                .then(response => {
-                    setMessages(prevMessages => [...prevMessages, response.data]);
-                    setCurrentMessage('');
-                })
-                .catch(error => {
-                    console.error('Error saving message:', error);
-                });
-        }
-    };
-
-    const handleImageChange = (e) => {
-        if (e.target.files && e.target.files[0]) {
-            setImage(URL.createObjectURL(e.target.files[0]));
-        }
-    };
-
-    const handleNameChange = (e) => {
-        setGroupName(e.target.value);
-    };
-
-    const handleNameSubmit = (e) => {
-        e.preventDefault();
-        // TODO: Päivitä ryhmän nimi tietokantaan
-    };
+    if (error) {
+        return (
+            <div className="groupPageContainer" style={{ color: "red" }}>
+                {typeof error === 'object' ? JSON.stringify(error) : String(error)}
+            </div>
+        );
+    }
+    
+    if (!group) return <div className="groupPageContainer">No group found.</div>;
 
     return (
-        <div className='groupPage'>
-            <Header />
-            <h1>{groupName}</h1>
-            <div className='mainContainer'>
-                <figure>
-                    <img src={image} alt={`${groupName} logo`} />
-                </figure>
-                <div className='chatBoxContainer'>
-                    <div className='messageContainer'>
-                        {messages.map((msg, index) => (
-                            <div key={msg.id || index} className='message'>
-                                <strong>{msg.username}:</strong> {msg.text}
-                            </div>
-                        ))}
-                    </div>
+        <div className="groupPageContainer">
+            <h1>{typeof group.groupName === 'object' ? JSON.stringify(group.groupName) : group.groupName}</h1>
+            <p>
+                <strong>Owner:</strong> {typeof group.ownerName === 'object' ? JSON.stringify(group.ownerName) : group.ownerName}
+            </p>
 
-                    <form onSubmit={handleSubmit}>
-                        <input
-                            type='text'
-                            placeholder='Type a message...'
-                            className='chatBoxInput'
-                            value={currentMessage}
-                            onChange={handleInputChange}
-                        />
-                        <button type='submit' className='sendButton'>Send</button>
-                    </form>
-                </div>
-
-                <div className='userList'>
-                    <p>Users:</p>
-                    <ul>
-                        <li>User1</li>
-                        <li>User2</li>
-                    </ul>
-                </div>
+            <div className="groupSection">
+                <h3>Members</h3>
+                <ul>
+                    {group.members?.map((member, index) => {
+                        const memberId = typeof member === 'object' ? member.userID : member;
+                        const memberName = typeof member === 'object' ? member.username : member;
+                        return (
+                            <li key={memberId || index}>
+                                {typeof memberName === 'object' ? JSON.stringify(memberName) : memberName}
+                            </li>
+                        );
+                    })}
+                </ul>
             </div>
 
-            <div className='uploadContainer'>
-                <p>Change group icon:</p>
-                <input type="file" accept="image/*" onChange={handleImageChange} />
-                <p>Change group name:</p>
-                <form onSubmit={handleNameSubmit}>
-                    <input type='text' value={groupName} onChange={handleNameChange} />
-                    <button type='submit' className='sendButton'>Change name</button>
-                </form>
+            <div className="groupSection">
+                <h3>Group Movies</h3>
+                {!group.movies || group.movies.length === 0 ? (
+                    <p>No movies added yet.</p>
+                ) : (
+                    <ul>
+                        {group.movies.map((item, index) => {
+                            const idVal = typeof item === 'object' && item !== null ? (item.movieID || JSON.stringify(item)) : item;
+                            return (
+                                <li key={idVal || index}>
+                                    Movie ID: {idVal}
+                                </li>
+                            );
+                        })}
+                    </ul>
+                )}
             </div>
         </div>
     );
 }
 
-export default Group;
+export default GroupPage;

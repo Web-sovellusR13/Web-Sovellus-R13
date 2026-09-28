@@ -10,6 +10,7 @@ import { createBrowserRouter } from "react-router-dom";
 import NotFound from "./screens/NotFound"; 
 import MovieDetails from './pages/MovieDetails'
 import CreateGroup from './pages/createGroup';
+import GroupPage from './pages/groupPage';
 
 const router = createBrowserRouter([ 
   { 
@@ -36,6 +37,10 @@ const router = createBrowserRouter([
       {
         path: "/createGroup",
         element: <CreateGroup />,
+      }, 
+      {
+        path: "/group/:id",
+        element: <GroupPage />,
       } 
     ] 
   } 
