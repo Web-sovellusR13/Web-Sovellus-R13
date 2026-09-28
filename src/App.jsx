@@ -5,6 +5,8 @@ import './App.css'
 import NowPlaying from './pages/NowPlaying'
 import Searchbar from './searchBar/searchBar'
 import { useNavigate } from "react-router-dom" 
+import GroupList from './pages/groupList'
+import CreateGroup from './pages/createGroup'
 
 // NOTE: This should probably be moved to its own file, if we decide to add more content into the main page.
 function Main() {
@@ -29,7 +31,8 @@ function App() {
   const pages = {
     main: <Main/>,
     search: <Searchbar/>,
-    groups: <Groups/>, // Replace this with the Groups component, when it is ready.
+    groups: <GroupList/>, // Replace this with the Groups component, when it is ready.
+    createGroup: <CreateGroup/>,
     profile: <Profile/> // Replace this with the Profile component, when it is ready.
   }
 

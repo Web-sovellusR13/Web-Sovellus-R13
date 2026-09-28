@@ -5,6 +5,7 @@ import errorHandler from './middleware/errorHandler.js'
 import userRouter from './routes/userRouter.js'
 import testRouter from './routes/testRouter.js'
 import movieRouter from './routes/movieRouter.js'
+import groupRouter from './routes/groupRouter.js'
 
 const port = process.env.PORT || 3000
 
@@ -17,6 +18,7 @@ app.use(express.urlencoded({ extended: false }))
 app.use('/api/user', userRouter)
 app.use('/', testRouter)
 app.use('/api/movies', movieRouter)
+app.use('/api/groups', groupRouter)
 
 // Health check endpoint for database connectivity
 app.get('/api/health', async (req, res) => {
