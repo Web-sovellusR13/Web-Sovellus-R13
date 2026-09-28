@@ -40,7 +40,7 @@ function App() {
   const pages = {
     main: <Main/>,
     search: <Searchbar/>,
-    groups: <GroupList/>, // Replace this with the Groups component, when it is ready.
+    groups: <GroupList/>,
     randomMovie: <RandomMovie/>,
     profile: <MyProfile setPage={setPage}/> 
   }
