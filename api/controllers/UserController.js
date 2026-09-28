@@ -81,6 +81,21 @@ const signup = async (req, res, next) => {
       error.status = 400
       return next(error)
     } 
+    if (password.length < 8) {
+      const error = new Error('Password must be at least 8 characters long')
+      error.status = 400
+      return next(error)
+    }
+    if (!/[A-Z]/.test(password)) {
+      const error = new Error('Password must contain at least one uppercase letter')
+      error.status = 400
+      return next(error)
+    }
+    if (!/[0-9]/.test(password)) {
+      const error = new Error('Password must contain at least one number')
+      error.status = 400
+      return next(error)
+    }
     const result = await addNewUser(username, email, password)
     return res.status(201).json(result.rows[0])
   } catch (error)  {
