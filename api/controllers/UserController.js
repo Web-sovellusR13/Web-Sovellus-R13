@@ -15,9 +15,7 @@ const signin = async (req, res,next) => {
       return next(error) 
     } 
 
-    // mock up data. should come from database in future
     const result = await getUserByEmail(email);
-
     const dbUser = result.rows[0] 
     if (!dbUser || !(await compare(password, dbUser.password.trimEnd()))) { 
       const error = new Error('Invalid email or password') 
@@ -29,9 +27,8 @@ const signin = async (req, res,next) => {
       process.env.JWT_SECRET, 
       { expiresIn: '1h' }, 
     ) 
-    return res.status(200).json({ id: dbUser.id, email: dbUser.email, token })
+    return res.status(200).json({ email: dbUser.email, token })
   } catch (error) { 
-    console.log(error);
     return next(error) 
   } 
 }
