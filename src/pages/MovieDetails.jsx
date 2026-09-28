@@ -15,6 +15,8 @@ function MovieDetails() {
     const [movie, setMovie] = useState(null)
     const [reviews, setReviews] = useState([])
     const [loading, setLoading] = useState(true)
+    const [reviewText, setReviewText] = useState('')
+    const [rating, setRating] = useState('')
 
     const addFavorite = async () => {
         try {
@@ -38,7 +40,46 @@ function MovieDetails() {
                 alert(error)
             }
         }
-    } 
+    }
+
+    const addReview = async () => {
+        if (!reviewText.trim() || !rating) {
+            alert('Please write a review and select a rating')
+            return
+        }
+
+        try{
+            const response = await axios.post(`${apiUrl}/api/reviews`,{
+                movieID: movie.id,
+                review: reviewText,
+                rating: Number(rating)
+            },
+            {
+                headers: {'Authorization': `Bearer ${user.token}`}
+            })
+            
+            if (response.status === 201) {
+                alert('Review added successfully')
+
+                setReviewText('')
+                setRating('')
+
+                axios.get(`${apiUrl}/api/reviews/${id}`)
+                    .then(response => {
+                    setReviews(response.data)
+                })
+            }
+
+        } catch (error) {
+            if (error.response?.status === 401) {
+                alert('Please sign in to add a review')
+            } else if (error.response?.data?.error?.message) {
+                alert(error.response.data.error.message)
+            } else {
+                alert('Something went wrong')
+            }
+        }
+    }
 
     useEffect(() => {
         axios.get(`${apiUrl}/api/movies/${id}`)
@@ -90,6 +131,40 @@ function MovieDetails() {
                     <button onClick={addFavorite}>
                         Add favorite
                     </button>
+
+                    {user?.token ? (
+                        <div className="review-form">
+                            <h3>Write a review</h3>
+
+                            <textarea
+                                rows="3"
+                                value={reviewText}
+                                onChange={event => setReviewText(event.target.value)}
+                                placeholder="Write your review here..."
+                            />
+
+                            <label>
+                                Rating:
+                                <select
+                                    value={rating}
+                                    onChange={event => setRating(event.target.value)}
+                                >
+                                    <option value="">Select rating</option>
+                                    <option value={1}>1</option>
+                                    <option value={2}>2</option>
+                                    <option value={3}>3</option>
+                                    <option value={4}>4</option>
+                                    <option value={5}>5</option>
+                                </select>
+                            </label>
+
+                            <button onClick={addReview}>
+                                Add review
+                            </button>
+                        </div>
+                    ) : (
+                        <p>Please sign in to write a review.</p>
+                    )}
                 </div>
 
                 <div className="reviews-section">

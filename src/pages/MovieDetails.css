@@ -29,3 +29,14 @@
 .review-card p {
     margin: 0.5rem 0;
 }
+
+.review-form textarea {
+    display: block;
+    width: 100%;
+    margin: 0.5rem 0 1rem;
+}
+
+.review-form select {
+    margin-left: 0.5rem;
+    margin-right: 1.5rem;
+}
