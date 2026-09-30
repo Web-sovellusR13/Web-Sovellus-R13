@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react'
 import { useUser } from '../context/useUser'
 import axios from 'axios'
 import './MyProfile.css'
+import { useNavigate } from 'react-router-dom'
 
 
 function MyProfile({ setPage }) {
     const { user, setUser } = useUser()
     const [profile, setProfile] = useState(null)
     const [error, setError] = useState("")
+    const navigate = useNavigate()
 
     const logout = () => {
     setUser({ email: '', password: '' })
@@ -75,6 +77,10 @@ function MyProfile({ setPage }) {
         return <p>Loading...</p>
     }
 
+  const favorites = () => { 
+    navigate(`/favorites/${profile.userID}`) 
+  } 
+
   return (
     <div>
       <h1>My Profile</h1>
@@ -82,6 +88,7 @@ function MyProfile({ setPage }) {
       <p>Username: {profile.username}</p>
       <p>Email: {profile.email}</p>
       <div className="profile-buttons">
+      <button onClick={favorites}>Favorites</button> 
       <button onClick={logout}>Log out</button>
       <button onClick={deleteAccount}>Delete account</button>
       </div>
