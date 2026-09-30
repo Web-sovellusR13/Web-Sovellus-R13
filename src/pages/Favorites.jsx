@@ -16,6 +16,7 @@ function Favorites() {
     const [favorites, setFavorites] = useState([])
     const [loading, setLoading] = useState(true)
 
+
     useEffect(() => {
         const getFavorites = async () => {
             try {
@@ -40,11 +41,22 @@ function Favorites() {
         getFavorites()
     }, [userID])
 
+    const shareFavorites = async () => {
+        await navigator.clipboard.writeText(window.location.href)
+        alert('Link copied!')
+    }
+
     return (
         <div>
-            <button onClick={() => navigate(-1)}>
-                ← Back
-            </button>
+            <div className='button-container'>
+                <button onClick={() => navigate(-1)}>
+                 ← Back
+                </button>
+
+                <button onClick={shareFavorites}>
+                 Share
+                </button>
+            </div>
 
             <h1>Favorite movies</h1>
             {loading && <p>Loading the list...</p>}
