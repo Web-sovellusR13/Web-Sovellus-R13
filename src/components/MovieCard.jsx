@@ -4,7 +4,10 @@ import './MovieCard.css'
 function MovieCard({ movie }) {
 
     return (
-        <Link to={`/movies/${movie.id}`} className="movie-card">
+        <Link 
+            to={`/movies/${movie.id}`}
+            className="movie-card"
+        >
             <img
                 className="movie-poster"
                 src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}

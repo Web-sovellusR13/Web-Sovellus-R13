@@ -1,4 +1,4 @@
-import { getNowPlayingMovies, getMovieById, getRandomMovieFromApi, getMovieGenreIds } from '../models/Movie.js'
+import { getNowPlayingMovies, getMovieById, getRandomMovieFromApi, getMovieGenreIds, searchMovies } from '../models/Movie.js'
 
 const getNowPlaying = async (req, res, next) => {
     try {
@@ -42,4 +42,18 @@ const getMovieGenres = async (req, res, next) => {
     }
 }
 
-export { getNowPlaying, getMovie, getRandomMovie, getMovieGenres }
+const searchMoviesController = async (req, res, next) => {
+    try {
+        const result = await searchMovies(
+            req.query.type,
+            req.query.query,
+            req.query.genre,
+            req.query.year
+        )
+        return res.status(200).json(result)
+    } catch (error) {
+        return next(error)
+    }
+}
+
+export { getNowPlaying, getMovie, getRandomMovie, getMovieGenres, searchMoviesController }

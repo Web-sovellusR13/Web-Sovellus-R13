@@ -72,4 +72,68 @@ const getMovieGenreIds = async () => {
     return response.data
 }
 
-export { getNowPlayingMovies, getMovieById, getRandomMovieFromApi, getMovieGenreIds }
+const searchMovies = async (type, query, genre, year) => {
+    let endpoint
+    let params = {
+        language: 'en-US',
+    }
+
+    if (query) {
+        if (type === 'tv') {
+            endpoint = 'https://api.themoviedb.org/3/search/tv'
+            params.query = query
+            if (year) {
+                params.first_air_date_year = year
+            }
+
+        } else {
+            endpoint = 'https://api.themoviedb.org/3/search/movie'
+            params.query = query
+            params.region = 'FI'
+            if (year) {
+                params.year = year
+            }
+        }
+
+    } else {
+        if (type === 'tv') {
+            endpoint = 'https://api.themoviedb.org/3/discover/tv'
+            if (year) {
+                params.first_air_date_year = year
+            }
+
+        } else {
+            endpoint = 'https://api.themoviedb.org/3/discover/movie'
+            if (year) {
+                params.primary_release_year = year
+            }
+            params.region = 'FI'
+        }
+        if (genre) {
+            params.with_genres = genre
+        }
+    }
+
+    const response = await axios.get(
+        endpoint,
+        {
+            headers: {
+                Authorization: `Bearer ${process.env.TMDB_TOKEN}`
+            },
+            params
+        }
+    )
+
+    let results = response.data.results || []
+
+    if (query && genre) {
+        results = results.filter(item =>
+            item.genre_ids?.includes(Number(genre))
+        )
+    }
+
+    return results
+}
+
+
+export { getNowPlayingMovies, getMovieById, getRandomMovieFromApi, getMovieGenreIds, searchMovies }

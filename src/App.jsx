@@ -4,7 +4,7 @@ import axios from 'axios'
 import './App.css'
 import NowPlaying from './pages/NowPlaying'
 import RandomMovie from './pages/RandomMovie'
-import Searchbar from './searchBar/searchBar'
+import Search from './pages/Search'
 import { useNavigate } from "react-router-dom" 
 import GroupList from './pages/groupList'
 import CreateGroup from './pages/createGroup'
@@ -35,11 +35,11 @@ function App() {
       window.addEventListener("resize", handleResize);
 
       return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [])
 
   const pages = {
     main: <Main/>,
-    search: <Searchbar/>,
+    search: <Search/>,
     groups: <GroupList/>,
     randomMovie: <RandomMovie/>,
     profile: <MyProfile setPage={setPage}/> 
