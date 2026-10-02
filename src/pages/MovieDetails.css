@@ -40,3 +40,11 @@
     margin-left: 0.5rem;
     margin-right: 1.5rem;
 }
+
+@media (max-width: 768px) {
+    .movie-details {
+    display: block;
+    }
+
+    
+}

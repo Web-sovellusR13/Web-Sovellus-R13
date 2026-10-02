@@ -52,7 +52,7 @@ function Favorites() {
                 <button onClick={() => navigate(-1)}>
                  ← Back
                 </button>
-
+                
                 <button onClick={shareFavorites}>
                  Share
                 </button>
