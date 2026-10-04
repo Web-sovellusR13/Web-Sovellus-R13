@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useUser } from '../context/useUser'
 import axios from 'axios'
 import './Favorites.css'
-import FavoriteCard from '../components/FavoriteCard'
+import FavoriteCard from '../components/FavoriteCard.jsx'
 
 
 const apiUrl = import.meta.env.VITE_API_URL
@@ -52,7 +52,7 @@ function Favorites() {
                 <button onClick={() => navigate(-1)}>
                  ← Back
                 </button>
-
+                
                 <button onClick={shareFavorites}>
                  Share
                 </button>

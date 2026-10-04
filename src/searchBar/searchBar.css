@@ -1,0 +1,29 @@
+#searchbar {
+    width: 90%;
+    max-width: 700px;
+    margin: 0 auto;
+    margin-top: 2rem;
+}
+
+#searchbar form {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+#searchbar input {
+    width: 400px;
+    padding: 10px;
+}
+
+#searchbar button {
+    padding: 10px 20px;
+}
+
+@media (max-width: 768px)  {
+
+    #searchbar {
+        width: 300px;
+        margin-top: 2rem;
+    }
+}
