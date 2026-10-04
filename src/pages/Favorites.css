@@ -9,6 +9,18 @@
     gap: 1rem;
 }
 
+@media (max-width: 1023px) {
+    .movieList {
+        grid-template-columns:2, 1fr;
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: space-between;
+    }
+
+}
+
 @media (max-width: 768px) {
     .movieList {
         grid-template-columns: 1fr;

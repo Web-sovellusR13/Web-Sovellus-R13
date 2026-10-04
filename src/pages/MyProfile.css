@@ -6,9 +6,22 @@
   gap: 15px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1023px) {
   .profile-buttons {
     display: flex;
+    align-items: center;
+    margin-top: 40px;
+  }
+
+  p {
+    text-align: center;
+    
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-buttons {
+    display: grid;
     align-items: center;
     margin-top: 40px;
   }
