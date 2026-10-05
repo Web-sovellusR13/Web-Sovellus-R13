@@ -54,13 +54,12 @@ export default function Authentication({authenticationMode}) {
           <label>Email</label> 
           <input  
             placeholder='Email'  
-            value={user.email}  
             onChange={e => setUser({...user,email: e.target.value}) 
           }/> 
           <label>Password</label> 
           <input  
             placeholder='Password'  
-            type='password' value={user.password}  
+            type='password'
             onChange={e => setUser({...user,password: e.target.value})} 
           /> 
           <Link to={authenticationMode === AuthenticationMode.SignIn ? '/signup' : '/signin'} onClick={() => setUser({email: '', password: ''})}> 
