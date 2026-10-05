@@ -11,7 +11,7 @@ const getNowPlaying = async (req, res, next) => {
 
 const getMovie = async (req, res, next) => {
     try {
-        const result = await getMovieById(req.params.id, req.query.type)
+        const result = await getMovieById(req.params.id)
         return res.status(200).json(result)
     } catch (error) {
         return next(error)
@@ -45,7 +45,6 @@ const getMovieGenres = async (req, res, next) => {
 const searchMoviesController = async (req, res, next) => {
     try {
         const result = await searchMovies(
-            req.query.type,
             req.query.query,
             req.query.genre,
             req.query.year

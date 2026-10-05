@@ -8,7 +8,7 @@ const apiUrl = import.meta.env.VITE_API_URL
 
 function MovieDetails() {
     const { user } = useUser()
-    const { contentId, contentType, goBack } = useNavigation()
+    const { movieId, goBack } = useNavigation()
 
     const [movie, setMovie] = useState(null)
     const [reviews, setReviews] = useState([])
@@ -62,7 +62,7 @@ function MovieDetails() {
                 setReviewText('')
                 setRating('')
 
-                axios.get(`${apiUrl}/api/reviews/${contentId}`)
+                axios.get(`${apiUrl}/api/reviews/${movieId}`)
                     .then(response => {
                     setReviews(response.data)
                 })
@@ -80,7 +80,7 @@ function MovieDetails() {
     }
 
     useEffect(() => {
-        axios.get(`${apiUrl}/api/movies/${contentId}?type=${contentType}`)
+        axios.get(`${apiUrl}/api/movies/${movieId}`)
             .then(response => {
                 setMovie(response.data)
                 setLoading(false)
@@ -89,17 +89,17 @@ function MovieDetails() {
                 alert(error.response ? error.response.data : error)
                 setLoading(false)
             })
-    }, [contentId, contentType])
+    }, [movieId])
 
     useEffect(() => {
-        axios.get(`${apiUrl}/api/reviews/${contentId}`)
+        axios.get(`${apiUrl}/api/reviews/${movieId}`)
             .then(response => {
                 setReviews(response.data)
             })
             .catch(error => {
                 alert(error.response ? error.response.data : error)
-                })
-    }, [contentId])
+            })
+    }, [movieId])
 
     if (loading) {
         return <p>Loading movie...</p>

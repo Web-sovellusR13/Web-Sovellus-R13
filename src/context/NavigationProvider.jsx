@@ -3,13 +3,11 @@ import { NavigationContext } from './NavigationContext'
 
 export default function NavigationProvider({ children }) {
     const [page, setPage] = useState('main')
-    const [contentId, setContentId] = useState(null)
+    const [movieId, setMovieId] = useState(null)
     const [previousPage, setPreviousPage] = useState('main')
-    const [contentType, setContentType] = useState('movie')
 
-    const openMovie = (id, from, type) => {
-        setContentId(id)
-        setContentType(type)
+    const openMovie = (id, from) => {
+        setMovieId(id)
         setPreviousPage(from)
         setPage('movieDetails')
     }
@@ -23,8 +21,7 @@ export default function NavigationProvider({ children }) {
             value={{
                 page,
                 setPage,
-                contentId,
-                contentType,
+                movieId,
                 openMovie,
                 goBack
             }}

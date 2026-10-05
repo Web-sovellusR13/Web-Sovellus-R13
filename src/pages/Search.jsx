@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import axios from "axios"
 import { Link } from 'react-router-dom'
 import { useNavigation } from "../context/useNavigation"
+import './Search.css'
 
 const apiUrl = import.meta.env.VITE_API_URL
 
@@ -12,7 +13,6 @@ const Search = () => {
     const [results, setResults] = useState([])
     const [genres, setGenres] = useState([])
 
-    const [type, setType] = useState('movie')
     const [year, setYear] = useState('')
     const [genre, setGenre] = useState('')
 
@@ -37,7 +37,6 @@ const Search = () => {
                 `${apiUrl}/api/movies/search`,
                 {
                     params: {
-                        type,
                         query,
                         genre,
                         year
@@ -59,14 +58,6 @@ const Search = () => {
     return (
         <div id="searchbar">
             <form onSubmit={handleSearch}>
-                <select
-                    value={type}
-                    onChange={e => setType(e.target.value)}
-                >
-                    <option value="movie">Movies</option>
-                    <option value="tv">TV Shows</option>
-                </select>
-
                 <input
                     type="text"
                     placeholder="Search by title"
@@ -96,23 +87,20 @@ const Search = () => {
 
                 <button type="submit">Search</button>
             </form>
-
             <ul>
-                {results.map((item, index) => {
-                    const title = item.title || item.name
-                    const date = item.release_date || item.first_air_date
-                    const year = date ? date.substring(0, 4) : ''
+                {results.map((movie) => {
+                    const year = movie.release_date ? movie.release_date.substring(0, 4) : ''
 
                     return (
-                        <li key={item.id || index}>
+                        <li key={movie.id}>
                             <Link
-                                to={`/movies/${item.id}`}
+                                to={`/movies/${movie.id}`}
                                 onClick={(e) => {
                                     e.preventDefault()
-                                    openMovie(item.id, "search", type)
+                                    openMovie(movie.id, "search")
                                 }}
                             >
-                                {title} {year && `(${year})`}
+                                {movie.title} {year && `(${year})`}
                             </Link>
                         </li>
                     )
