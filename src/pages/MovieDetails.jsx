@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
 import { useUser } from '../context/useUser'
+import { useNavigation } from '../context/useNavigation'
 import axios from 'axios'
 import './MovieDetails.css'
 
@@ -8,9 +8,7 @@ const apiUrl = import.meta.env.VITE_API_URL
 
 function MovieDetails() {
     const { user } = useUser()
-
-    const { id } = useParams()
-    const navigate = useNavigate()
+    const { movieId, goBack } = useNavigation()
 
     const [movie, setMovie] = useState(null)
     const [reviews, setReviews] = useState([])
@@ -64,7 +62,7 @@ function MovieDetails() {
                 setReviewText('')
                 setRating('')
 
-                axios.get(`${apiUrl}/api/reviews/${id}`)
+                axios.get(`${apiUrl}/api/reviews/${movieId}`)
                     .then(response => {
                     setReviews(response.data)
                 })
@@ -82,7 +80,7 @@ function MovieDetails() {
     }
 
     useEffect(() => {
-        axios.get(`${apiUrl}/api/movies/${id}`)
+        axios.get(`${apiUrl}/api/movies/${movieId}`)
             .then(response => {
                 setMovie(response.data)
                 setLoading(false)
@@ -91,17 +89,17 @@ function MovieDetails() {
                 alert(error.response ? error.response.data : error)
                 setLoading(false)
             })
-    }, [id])
+    }, [movieId])
 
     useEffect(() => {
-        axios.get(`${apiUrl}/api/reviews/${id}`)
+        axios.get(`${apiUrl}/api/reviews/${movieId}`)
             .then(response => {
                 setReviews(response.data)
             })
             .catch(error => {
                 alert(error.response ? error.response.data : error)
-                })
-    }, [id])
+            })
+    }, [movieId])
 
     if (loading) {
         return <p>Loading movie...</p>
@@ -109,7 +107,7 @@ function MovieDetails() {
 
     return (
         <div>
-            <button onClick={() => navigate(-1)}>
+            <button onClick={goBack}>
                 ← Back
             </button>
 

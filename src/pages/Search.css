@@ -20,6 +20,15 @@
     padding: 10px 20px;
 }
 
+#searchbar ul {
+    list-style: none;
+    padding: 0;
+}
+
+#searchbar li {
+    margin-bottom: 8px;
+}
+
 @media (max-width: 768px)  {
 
     #searchbar {
