@@ -1,97 +1,136 @@
-import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import axios from "axios";
-import { useUser } from "../context/useUser";
-import "./group.css";
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
+import { useUser } from '../context/useUser';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
-function GroupPage() {
-    const { id } = useParams();
-    const { user } = useUser();
-    
-    const [group, setGroup] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
-    const [newMemberUsername, setNewMemberUsername] = useState("");
-    const [addMemberMsg, setAddMemberMsg] = useState("");
+const decodeToken = (token) => {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+            atob(base64)
+                .split('')
+                .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+                .join('')
+        );
+        return JSON.parse(jsonPayload);
+    } catch (e) {
+        console.error('Error decoding token:', e);
+        return null;
+    }
+};
 
-    const fetchGroupData = () => {
-        axios.get(`${apiUrl}/api/groups/${id}`)
-            .then(response => {
-                setGroup(response.data);
-            })
-            .catch(err => {
-                const apiError = err.response?.data;
-                setError(typeof apiError === 'object' ? apiError.message : (err.message || "Failed to fetch group"));
-            })
-            .finally(() => setLoading(false));
+function GroupDetail() {
+    const { id } = useParams();
+    const { user, token } = useUser();
+
+    const [group, setGroup] = useState(null);
+    const [newMemberName, setNewMemberName] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const authToken = token || user?.token || sessionStorage.getItem('token');
+    let currentUserId = user?.userID || user?.id || user?.userId;
+    if (!currentUserId && authToken) {
+        const decoded = decodeToken(authToken);
+        currentUserId = decoded?.userId || decoded?.userID || decoded?.id;
+    }
+    const fetchGroupData = async () => {
+        try {
+            const config = {
+                headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
+            };
+
+            const response = await axios.get(`${apiUrl}/api/groups/${id}`, config);
+            setGroup(response.data);
+        } catch (err) {
+            console.error('Error fetching group details:', err);
+            setError('Failed to fetch group details.');
+        }
     };
 
     useEffect(() => {
-        fetchGroupData();
+        if (id) {
+            fetchGroupData();
+        }
     }, [id]);
 
     const handleAddMember = async (e) => {
         e.preventDefault();
-        setAddMemberMsg("");
+        if (!newMemberName.trim()) return;
 
-        const currentUserId = user?.userID || user?.id;
+        if (!currentUserId) {
+            setError('You must be logged in to add members.');
+            return;
+        }
+
+        setError('');
+        setLoading(true);
 
         try {
-            const res = await axios.post(`${apiUrl}/api/groups/${id}/members`, {
-                username: newMemberUsername.trim(),
-                requesterID: currentUserId
-            });
-            setAddMemberMsg(res.data.message);
-            setNewMemberUsername("");
-            fetchGroupData();
+            const config = {
+                headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
+            };
+
+            await axios.post(
+                `${apiUrl}/api/groups/${id}/members`,
+                {
+                    username: newMemberName.trim(),
+                    requesterID: Number(currentUserId)
+                },
+                config
+            );
+
+            await fetchGroupData();
+            setNewMemberName('');
         } catch (err) {
-            setAddMemberMsg(err.response?.data?.error || "Failed to add member");
+            console.error('Error adding member:', err);
+            const msg = err.response?.data?.error || 'Failed to add member.';
+            setError(msg);
+        } finally {
+            setLoading(false);
         }
     };
 
-    if (loading) return <div className="groupPageContainer">Loading...</div>;
-    if (error) return <div className="groupPageContainer" style={{ color: "red" }}>{String(error)}</div>;
-    if (!group) return <div className="groupPageContainer">No group found.</div>;
-
-    const currentUserId = user?.userID || user?.id;
-    const isOwner = currentUserId && Number(currentUserId) === Number(group.ownerID);
-
     return (
-        <div className="groupPageContainer">
-            <h1>{group.groupName}</h1>
-            <p><strong>Owner:</strong> {group.ownerName}</p>
+        <div style={{ padding: '20px' }}>
+            <h2>{group?.groupName || `Group #${id}`}</h2>
+            {group?.ownerName && <p><strong>Owner:</strong> {group.ownerName}</p>}
 
-            <div className="groupSection">
-                <h3>Members</h3>
+            {error && <p style={{ color: 'red' }}>{error}</p>}
+
+            <h3>Members</h3>
+            {!group?.members || group.members.length === 0 ? (
+                <p>No members in this group yet.</p>
+            ) : (
                 <ul>
-                    {group.members?.map((member, index) => (
-                        <li key={member.userID || index}>
-                            {member.username || member}
+                    {group.members.map((member) => (
+                        <li key={member.userID}>
+                            {member.username} {group.ownerID === member.userID ? '(Owner)' : ''}
                         </li>
                     ))}
                 </ul>
-            </div>
-
-            {isOwner && (
-                <div className="groupSection ownerPanel" style={{ marginTop: '20px', borderTop: '1px solid #ccc', paddingTop: '10px' }}>
-                    <h3>Add Member to Group</h3>
-                    {addMemberMsg && <p>{addMemberMsg}</p>}
-                    <form onSubmit={handleAddMember}>
-                        <input
-                            type="text"
-                            placeholder="Enter username"
-                            value={newMemberUsername}
-                            onChange={(e) => setNewMemberUsername(e.target.value)}
-                            required
-                        />
-                        <button type="submit">Add User</button>
-                    </form>
-                </div>
             )}
+
+            <hr />
+
+            <h3>Add Member to Group</h3>
+            <form onSubmit={handleAddMember}>
+                <input
+                    type="text"
+                    placeholder="Enter username..."
+                    value={newMemberName}
+                    onChange={(e) => setNewMemberName(e.target.value)}
+                    disabled={loading}
+                />
+                <button type="submit" disabled={loading}>
+                    {loading ? 'Adding...' : 'Add Member'}
+                </button>
+            </form>
         </div>
     );
 }
 
-export default GroupPage;
+export default GroupDetail;

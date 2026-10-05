@@ -52,7 +52,7 @@ function App() {
   return (
     <div className="menu-container">
 
-      <button class="hamburger" onClick={() => {
+      <button className="hamburger" onClick={() => {
         isHamburgerMenuOpen ? setIsHamburgerMenuOpen(false) : setIsHamburgerMenuOpen(true)
       }}>
           ☰
