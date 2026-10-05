@@ -11,7 +11,7 @@ const getNowPlaying = async (req, res, next) => {
 
 const getMovie = async (req, res, next) => {
     try {
-        const result = await getMovieById(req.params.id)
+        const result = await getMovieById(req.params.id, req.query.type)
         return res.status(200).json(result)
     } catch (error) {
         return next(error)

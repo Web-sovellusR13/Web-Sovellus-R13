@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react"
 import axios from "axios"
 import { Link } from 'react-router-dom'
+import { useNavigation } from "../context/useNavigation"
 
 const apiUrl = import.meta.env.VITE_API_URL
 
 const Search = () => {
+    const { openMovie } = useNavigation()
+
     const [query, setQuery] = useState('')
     const [results, setResults] = useState([])
     const [genres, setGenres] = useState([])
@@ -102,7 +105,13 @@ const Search = () => {
 
                     return (
                         <li key={item.id || index}>
-                            <Link to={`/movies/${item.id}`}>
+                            <Link
+                                to={`/movies/${item.id}`}
+                                onClick={(e) => {
+                                    e.preventDefault()
+                                    openMovie(item.id, "search", type)
+                                }}
+                            >
                                 {title} {year && `(${year})`}
                             </Link>
                         </li>

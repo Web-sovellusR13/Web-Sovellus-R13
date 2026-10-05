@@ -10,16 +10,16 @@ const getNowPlayingMovies = async () => {
             params: {
                 language: 'en-US',
                 region: 'FI',
-                page: 1
             }
         }
     )
     return response.data
 }
 
-const getMovieById = async (movieId) => {
+const getMovieById = async (movieId, type) => {
+    const endpoint = type === 'tv' ? 'tv' : 'movie'
     const response = await axios.get(
-        `https://api.themoviedb.org/3/movie/${movieId}`,
+        `https://api.themoviedb.org/3/${endpoint}/${movieId}`,
         {
             headers: {
                 Authorization: `Bearer ${process.env.TMDB_TOKEN}`

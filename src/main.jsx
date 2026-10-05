@@ -5,6 +5,7 @@ import App from './App.jsx'
 import Authentication, { AuthenticationMode } from './screens/Authentication' 
 import ProtectedRoute from './components/ProtectedRoute' 
 import UserProvider from './context/UserProvider.jsx' 
+import NavigationProvider from './context/NavigationProvider.jsx'
 import { RouterProvider } from 'react-router-dom' 
 import { createBrowserRouter } from "react-router-dom"; 
 import NotFound from "./screens/NotFound"; 
@@ -48,8 +49,10 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <UserProvider> 
-      <RouterProvider router={router} /> 
+    <UserProvider>
+      <NavigationProvider>
+        <RouterProvider router={router} /> 
+      </NavigationProvider> 
     </UserProvider> 
   </StrictMode>,
 )
