@@ -14,7 +14,6 @@ function GroupPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     
-    // Uuden jäsenen lisäämisen tila
     const [newMemberUsername, setNewMemberUsername] = useState("");
     const [addMemberMsg, setAddMemberMsg] = useState("");
 
