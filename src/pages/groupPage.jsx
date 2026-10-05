@@ -13,7 +13,6 @@ function GroupPage() {
     const [group, setGroup] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    
     const [newMemberUsername, setNewMemberUsername] = useState("");
     const [addMemberMsg, setAddMemberMsg] = useState("");
 
