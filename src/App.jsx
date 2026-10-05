@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
-import { useUser } from "./context/useUser" 
+import { useUser } from "./context/useUser"
+import { useNavigation } from './context/useNavigation' 
 import axios from 'axios'
 import './App.css'
 import NowPlaying from './pages/NowPlaying'
+import MovieDetails from './pages/MovieDetails'
 import RandomMovie from './pages/RandomMovie'
-import Searchbar from './searchBar/searchBar'
+import Search from './pages/Search'
 import { useNavigate } from "react-router-dom" 
 import GroupList from './pages/groupList'
 import CreateGroup from './pages/createGroup'
@@ -22,7 +24,7 @@ function Groups() {
 
 
 function App() {
-  const [page, setPage] = useState("main");
+  const { page, setPage } = useNavigation()
   const [isHamburgerMenuOpen, setIsHamburgerMenuOpen] = useState(false);
   const [width, setWidth] = useState(window.innerWidth);
   const navigate = useNavigate() 
@@ -35,14 +37,15 @@ function App() {
       window.addEventListener("resize", handleResize);
 
       return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [])
 
   const pages = {
     main: <Main/>,
-    search: <Searchbar/>,
+    search: <Search/>,
     groups: <GroupList/>,
     randomMovie: <RandomMovie/>,
-    profile: <MyProfile setPage={setPage}/> 
+    profile: <MyProfile setPage={setPage}/>,
+    movieDetails: <MovieDetails/>
   }
 
   const signin = () => { 

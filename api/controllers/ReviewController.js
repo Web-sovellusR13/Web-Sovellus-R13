@@ -31,7 +31,7 @@ const getReviews = async (req, res, next) => {
         const movieID = req.params.movieID
         
         const result = await getReviewsByMovieId(movieID)
-        return res.status(201).json(result)
+        return res.status(200).json(result)
     } catch (error){
         return next(error)
     }
