@@ -40,3 +40,34 @@
     margin-left: 0.5rem;
     margin-right: 1.5rem;
 }
+
+@media (min-width: 769px) and (max-width: 1023px) {
+    .movie-details  {
+        grid-template-columns: 300px 1fr;
+    }
+
+    .movie-details p {
+        text-align: start;
+    }
+}
+
+@media (max-width: 768px) {
+    .movie-details {
+    display: block;
+    }
+
+    .movie-details h2 {
+        text-align: center;
+    }
+
+    .details-poster {
+        display: block;
+        margin: 0 auto;
+    }
+
+    .favButton {
+        display: block;
+        margin: 0 auto;
+    }
+      
+}

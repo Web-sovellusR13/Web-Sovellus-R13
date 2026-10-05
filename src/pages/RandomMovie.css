@@ -10,3 +10,16 @@
 	flex-direction: column;
 	align-items: flex-start;
 }
+
+@media (max-width: 1023px) {
+	.random-movie-container {
+		display: grid;
+	}
+
+	.random-movie-container form {
+		display: grid;
+	}
+
+}
+
+

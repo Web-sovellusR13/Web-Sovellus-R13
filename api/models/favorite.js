@@ -7,4 +7,11 @@ const addNewFavorite = async (userID, movieID) => {
     return result
 }
 
-export  { addNewFavorite }
+const selectAllFavorites = async (userID) => {
+    const result = await pool.query(
+        'SELECT * FROM public.favorites WHERE "userID" = $1',[userID]
+    )
+    return result
+}
+
+export  { addNewFavorite, selectAllFavorites }

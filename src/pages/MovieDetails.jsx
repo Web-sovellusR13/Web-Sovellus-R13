@@ -126,7 +126,7 @@ function MovieDetails() {
                     <p>Release date: {movie.release_date}</p>
                     <p>Runtime: {movie.runtime} minutes</p>
                     <p>Genres: {movie.genres.map(genre => genre.name).join(', ')}</p>
-                    <button onClick={addFavorite}>
+                    <button className='favButton' onClick={addFavorite}>
                         Add favorite
                     </button>
 

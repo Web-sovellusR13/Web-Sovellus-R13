@@ -12,6 +12,7 @@ import NotFound from "./screens/NotFound";
 import MovieDetails from './pages/MovieDetails'
 import CreateGroup from './pages/createGroup';
 import GroupPage from './pages/groupPage';
+import Favorites from './pages/Favorites.jsx'
 
 const router = createBrowserRouter([ 
   { 
@@ -42,9 +43,14 @@ const router = createBrowserRouter([
       {
         path: "/group/:id",
         element: <GroupPage />,
-      } 
+      }, 
+      {
+        path: "/favorites/:userID",
+        element: <Favorites />
+      }
     ] 
-  } 
+  }
+
 ]) 
 
 createRoot(document.getElementById('root')).render(
