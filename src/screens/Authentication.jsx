@@ -53,12 +53,12 @@ export default function Authentication({authenticationMode}) {
         )}
           <label>Email</label> 
           <input  
-            placeholder='Email'
+            placeholder='Email'  
             onChange={e => setUser({...user,email: e.target.value}) 
           }/> 
           <label>Password</label> 
           <input  
-            placeholder='Password'
+            placeholder='Password'  
             type='password'
             onChange={e => setUser({...user,password: e.target.value})} 
           /> 

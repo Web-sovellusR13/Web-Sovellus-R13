@@ -27,7 +27,7 @@ const signin = async (req, res,next) => {
       process.env.JWT_SECRET, 
       { expiresIn: '1h' }, 
     ) 
-    return res.status(200).json({ email: dbUser.email, token })
+    return res.status(200).json({ id: dbUser.userID, email: dbUser.email, token })
   } catch (error) { 
     return next(error) 
   } 
