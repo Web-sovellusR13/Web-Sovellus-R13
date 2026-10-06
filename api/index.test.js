@@ -173,7 +173,7 @@ describe("Testing reviews", () => {
     token = getToken(testUser.email, testUser.userId) 
   }) 
 
-  const testReview = { movieID: 1, review: "test", rating: "5.0" } 
+  const testReview = { movieID: 1, review: "test", rating: 5 } 
 
   it("should create a new review", async () => { 
     const response = await fetch("http://localhost:3000/api/reviews", { 
@@ -304,7 +304,7 @@ describe("Testing reviews", () => {
   it("should get all reviews", async () => { 
     const response = await fetch("http://localhost:3000/api/reviews/1") 
     const data = await response.json() 
-    expect(response.status).to.equal(201) 
+    expect(response.status).to.equal(200) 
     expect(data).to.be.an("array").that.is.not.empty 
     expect(data[0]).to.include.all.keys(["revID", "review", "rating", "time", "username"]) 
     expect(data[0].review).to.equal(testReview.review) 
@@ -315,7 +315,7 @@ describe("Testing reviews", () => {
   it("should get no reviews for a movie without reviews", async () => { 
     const response = await fetch("http://localhost:3000/api/reviews/999999") 
     const data = await response.json() 
-    expect(response.status).to.equal(201) 
+    expect(response.status).to.equal(200) 
     expect(data).to.be.an("array").that.is.empty 
   }) 
 })

@@ -32,8 +32,9 @@ CREATE TABLE IF NOT EXISTS public.reviews
     "userID" integer NOT NULL,
     "movieID" integer NOT NULL,
     review character varying(500) NOT NULL,
-    rating numeric(3, 1) NOT NULL,
-    "time" timestamp without time zone DEFAULT now() NOT NULL,
+    rating integer NOT NULL,
+    "time" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
     PRIMARY KEY ("revID")
 );
 
@@ -71,62 +72,68 @@ CREATE TABLE IF NOT EXISTS public.requests
 
 ALTER TABLE IF EXISTS public.reviews
     ADD FOREIGN KEY ("userID")
-    REFERENCES public.app_users ("userID") MATCH SIMPLE
+    REFERENCES public.app_users ("userID")
+    MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
 
+ALTER TABLE public.reviews
+    ADD CONSTRAINT chk_rating_range
+    CHECK (rating >= 1 AND rating <= 5);
 
 ALTER TABLE IF EXISTS public.groups
     ADD CONSTRAINT owner FOREIGN KEY ("ownerID")
-    REFERENCES public.app_users ("userID") MATCH SIMPLE
+    REFERENCES public.app_users ("userID")
+    MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
-
 
 ALTER TABLE IF EXISTS public.group_movies
     ADD FOREIGN KEY ("groupID")
-    REFERENCES public.groups ("groupID") MATCH SIMPLE
+    REFERENCES public.groups ("groupID")
+    MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
-
 
 ALTER TABLE IF EXISTS public.members
     ADD FOREIGN KEY ("user_userID")
-    REFERENCES public.app_users ("userID") MATCH SIMPLE
+    REFERENCES public.app_users ("userID")
+    MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
-
 
 ALTER TABLE IF EXISTS public.members
     ADD FOREIGN KEY ("groups_groupID")
-    REFERENCES public.groups ("groupID") MATCH SIMPLE
+    REFERENCES public.groups ("groupID")
+    MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
-
 
 ALTER TABLE IF EXISTS public.requests
     ADD FOREIGN KEY ("user_userID")
-    REFERENCES public.app_users ("userID") MATCH SIMPLE
+    REFERENCES public.app_users ("userID")
+    MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
-
 
 ALTER TABLE IF EXISTS public.requests
     ADD FOREIGN KEY ("groups_groupID")
-    REFERENCES public.groups ("groupID") MATCH SIMPLE
+    REFERENCES public.groups ("groupID")
+    MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
 
+ALTER TABLE public.requests
+    ADD CONSTRAINT chk_request_status
+    CHECK (status IN ('pending', 'approved', 'rejected'));
 
-ALTER TABLE requests
-	ADD CONSTRAINT chk_request_status
-	CHECK (status IN ('pending','approved','rejected'));
+SET timezone = "Europe/Helsinki";
 
-END;
+COMMIT;
