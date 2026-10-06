@@ -94,6 +94,36 @@ function GroupDetail() {
         }
     };
 
+    const handleRemoveMember = async (memberID) => {
+    const confirmed = window.confirm(
+        'Are you sure you want to remove this member from the group?'
+    )
+
+    if (!confirmed) {
+        return
+    }
+
+    try {
+        await axios.delete(
+            `${apiUrl}/api/groups/${id}/members/${memberID}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${authToken}`
+                }
+            }
+        )
+
+        await fetchGroupData()
+    } catch (error) {
+        console.error('Error removing member:', error)
+
+        setError(
+            error.response?.data?.error?.message ||
+            'Failed to remove member.'
+        )
+    }
+}
+
     return (
         <div style={{ padding: '20px' }}>
             <h2>{group?.groupName || `Group #${id}`}</h2>
@@ -108,7 +138,14 @@ function GroupDetail() {
                 <ul>
                     {group.members.map((member) => (
                         <li key={member.userID}>
-                            {member.username} {group.ownerID === member.userID ? '(Owner)' : ''}
+                            {member.username} 
+                            {group.ownerID === member.userID ? '(Owner)' : ''}
+                            {group.ownerID === currentUserId && 
+                            member.userID !== group.ownerID && (
+                                <button onClick={() => handleRemoveMember(member.userID)}>
+                                    Remove
+                                </button>
+                            )}
                         </li>
                     ))}
                 </ul>

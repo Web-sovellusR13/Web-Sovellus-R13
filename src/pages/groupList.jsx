@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Link } from 'react-router-dom'
-import './GroupList.css'
+import './groupList.css'
 
 const apiUrl = import.meta.env.VITE_API_URL
 
