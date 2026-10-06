@@ -1,4 +1,5 @@
 import { pool } from '../models/db.js'
+import { removeMember } from '../models/Group.js'
 
 export const getGroups = async (req, res, next) => {
   try {
@@ -149,4 +150,25 @@ export const addMember = async (req, res, next) => {
   } catch (error) {
     next(error)
   }
+}
+
+export const removeMemberFromGroup = async (req, res, next) => {
+    const { id: groupID } = req.params
+    const { userID } = req.params
+
+    try {
+        const result = await removeMember(groupID, userID)
+
+        if (!result) {
+            return res.status(404).json({
+                error: 'Member not found in this group'
+            })
+        }
+
+        return res.status(200).json({
+            message: 'Member removed from group'
+        })
+    } catch (error) {
+        next(error)
+    }
 }
