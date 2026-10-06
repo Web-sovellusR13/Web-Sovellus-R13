@@ -15,9 +15,7 @@ const signin = async (req, res,next) => {
       return next(error) 
     } 
 
-    // mock up data. should come from database in future
     const result = await getUserByEmail(email);
-
     const dbUser = result.rows[0] 
     if (!dbUser || !(await compare(password, dbUser.password.trimEnd()))) { 
       const error = new Error('Invalid email or password') 
@@ -29,9 +27,8 @@ const signin = async (req, res,next) => {
       process.env.JWT_SECRET, 
       { expiresIn: '1h' }, 
     ) 
-    return res.status(200).json({ id: dbUser.id, email: dbUser.email, token })
+    return res.status(200).json({ id: dbUser.userID, email: dbUser.email, token })
   } catch (error) { 
-    console.log(error);
     return next(error) 
   } 
 }
@@ -84,6 +81,21 @@ const signup = async (req, res, next) => {
       error.status = 400
       return next(error)
     } 
+    if (password.length < 8) {
+      const error = new Error('Password must be at least 8 characters long')
+      error.status = 400
+      return next(error)
+    }
+    if (!/[A-Z]/.test(password)) {
+      const error = new Error('Password must contain at least one uppercase letter')
+      error.status = 400
+      return next(error)
+    }
+    if (!/[0-9]/.test(password)) {
+      const error = new Error('Password must contain at least one number')
+      error.status = 400
+      return next(error)
+    }
     const result = await addNewUser(username, email, password)
     return res.status(201).json(result.rows[0])
   } catch (error)  {
