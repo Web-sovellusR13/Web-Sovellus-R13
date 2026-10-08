@@ -11,7 +11,7 @@ const addReview = async (req, res, next) => {
         if (!movieID){
             throw new ApiError('Movie ID is required', 400)
         }
-        if (!review || !rating){
+        if (!review || rating === undefined || rating === null){
             throw new ApiError('Review and rating are required', 400)
         }
 
