@@ -5,53 +5,27 @@ import { useUser } from '../context/useUser';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
-const decodeToken = (token) => {
-    try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(
-            atob(base64)
-                .split('')
-                .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-                .join('')
-        );
-        return JSON.parse(jsonPayload);
-    } catch (e) {
-        console.error('Error decoding token:', e);
-        return null;
-    }
-};
-
 function CreateGroup() {
     const [groupName, setGroupName] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
-    const { user } = useUser();
+    const { user, token } = useUser();
 
     const handleSubmit = (e) => {
         e.preventDefault();
         setError('');
 
-        const token = user?.token || sessionStorage.getItem('token') || localStorage.getItem('token');
+        const activeToken = token || user?.token;
 
-        let currentUserId = user?.userID || user?.id || user?.userId;
-
-        if (!currentUserId && token) {
-            const decoded = decodeToken(token);
-            currentUserId = decoded?.userId || decoded?.userID || decoded?.id;
-        }
-
-        console.log('Resolved currentUserId from Token:', currentUserId);
-
-        if (!currentUserId) {
-            setError('Login to create a group.');
+        if (!activeToken) {
+            setError('Please login to create a group.');
             return;
         }
 
         if (!groupName.trim()) {
-            setError('Groupname musnt be empty.');
+            setError('Group name cannot be empty.');
             return;
         }
 
@@ -60,11 +34,10 @@ function CreateGroup() {
         axios.post(
             `${apiUrl}/api/groups`, 
             { 
-                groupName: groupName.trim(),
-                ownerID: Number(currentUserId)
+                groupName: groupName.trim()
             },
             {
-                headers: token ? { Authorization: `Bearer ${token}` } : {}
+                headers: { Authorization: `Bearer ${activeToken}` }
             }
         )
         .then(response => {
@@ -72,12 +45,12 @@ function CreateGroup() {
             if (groupId) {
                 navigate(`/group/${groupId}`);
             } else {
-                setError('Group created but cant be found.');
+                setError('Group created, but could not retrieve group ID.');
             }
         })
         .catch(error => {
             console.error('Error creating group:', error);
-            const msg = error.response?.data?.error || error.response?.data?.message || 'Ryhmän luonti epäonnistui';
+            const msg = error.response?.data?.error || error.response?.data?.message || 'Failed to create group.';
             setError(msg);
         })
         .finally(() => {
