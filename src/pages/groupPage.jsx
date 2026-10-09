@@ -5,23 +5,6 @@ import { useUser } from '../context/useUser';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
-const decodeToken = (token) => {
-    try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(
-            atob(base64)
-                .split('')
-                .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-                .join('')
-        );
-        return JSON.parse(jsonPayload);
-    } catch (e) {
-        console.error('Error decoding token:', e);
-        return null;
-    }
-};
-
 function GroupDetail() {
     const { id } = useParams();
     const { user, token } = useUser();
@@ -32,13 +15,8 @@ function GroupDetail() {
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
-    const jwtToken = token || user?.token;
-
-    let currentUserId = user?.userID || user?.id || user?.userId;
-    if (!currentUserId && jwtToken) {
-        const decoded = decodeToken(jwtToken);
-        currentUserId = decoded?.userId || decoded?.userID || decoded?.id;
-    }
+    const activeToken = token || user?.token;
+    const currentUserId = user?.userID || user?.id || user?.userId;
 
     const isOwner = group && Number(group.ownerID) === Number(currentUserId);
     const isMember = group?.members?.some((m) => Number(m.userID) === Number(currentUserId));
@@ -46,7 +24,7 @@ function GroupDetail() {
     const fetchGroupData = async () => {
         try {
             const config = {
-                headers: jwtToken ? { Authorization: `Bearer ${jwtToken}` } : {}
+                headers: activeToken ? { Authorization: `Bearer ${activeToken}` } : {}
             };
 
             const response = await axios.get(`${apiUrl}/api/groups/${id}`, config);
@@ -58,7 +36,8 @@ function GroupDetail() {
             }
         } catch (err) {
             console.error('Error fetching group details:', err);
-            setError('Failed to fetch group details.');
+            const errMsg = err.response?.data?.error || err.response?.data?.message || 'Failed to fetch group details.';
+            setError(typeof errMsg === 'object' ? JSON.stringify(errMsg) : errMsg);
         }
     };
 
@@ -66,11 +45,11 @@ function GroupDetail() {
         if (id) {
             fetchGroupData();
         }
-    }, [id, currentUserId, jwtToken]);
+    }, [id, currentUserId, activeToken]);
 
     const handleRequestJoin = async () => {
-        if (!currentUserId) {
-            setError('You must be logged in to request join access.');
+        if (!activeToken) {
+            setError('Please login to request join access.');
             return;
         }
 
@@ -79,7 +58,7 @@ function GroupDetail() {
 
         try {
             const config = {
-                headers: jwtToken ? { Authorization: `Bearer ${jwtToken}` } : {}
+                headers: { Authorization: `Bearer ${activeToken}` }
             };
 
             await axios.post(
@@ -91,7 +70,8 @@ function GroupDetail() {
             setMessage('Join request sent to group owner!');
         } catch (err) {
             console.error('Error sending join request:', err);
-            setError(err.response?.data?.error || 'Failed to send join request.');
+            const errMsg = err.response?.data?.error || err.response?.data?.message || 'Failed to send join request.';
+            setError(typeof errMsg === 'object' ? JSON.stringify(errMsg) : errMsg);
         }
     };
 
@@ -101,7 +81,7 @@ function GroupDetail() {
 
         try {
             const config = {
-                headers: jwtToken ? { Authorization: `Bearer ${jwtToken}` } : {}
+                headers: { Authorization: `Bearer ${activeToken}` }
             };
 
             await axios.post(
@@ -117,7 +97,29 @@ function GroupDetail() {
             await fetchGroupData();
         } catch (err) {
             console.error('Error responding to request:', err);
-            setError(err.response?.data?.error || 'Failed to update request status.');
+            const errMsg = err.response?.data?.error || err.response?.data?.message || 'Failed to update request status.';
+            setError(typeof errMsg === 'object' ? JSON.stringify(errMsg) : errMsg);
+        }
+    };
+
+    const handleRemoveMember = async (memberId) => {
+        setError('');
+        setMessage('');
+
+        try {
+            const config = {
+                headers: { Authorization: `Bearer ${activeToken}` },
+                data: { requesterID: Number(currentUserId) }
+            };
+
+            await axios.delete(`${apiUrl}/api/groups/${id}/members/${memberId}`, config);
+
+            setMessage('Member removed successfully.');
+            await fetchGroupData();
+        } catch (err) {
+            console.error('Error removing member:', err);
+            const errMsg = err.response?.data?.error || err.response?.data?.message || 'Failed to remove member.';
+            setError(typeof errMsg === 'object' ? JSON.stringify(errMsg) : errMsg);
         }
     };
 
@@ -125,8 +127,8 @@ function GroupDetail() {
         e.preventDefault();
         if (!newMemberName.trim()) return;
 
-        if (!currentUserId) {
-            setError('You must be logged in to add members.');
+        if (!activeToken) {
+            setError('Please login to add members.');
             return;
         }
 
@@ -136,7 +138,7 @@ function GroupDetail() {
 
         try {
             const config = {
-                headers: jwtToken ? { Authorization: `Bearer ${jwtToken}` } : {}
+                headers: { Authorization: `Bearer ${activeToken}` }
             };
 
             await axios.post(
@@ -153,7 +155,8 @@ function GroupDetail() {
             setMessage('Member added successfully!');
         } catch (err) {
             console.error('Error adding member:', err);
-            setError(err.response?.data?.error || 'Failed to add member.');
+            const errMsg = err.response?.data?.error || err.response?.data?.message || 'Failed to add member.';
+            setError(typeof errMsg === 'object' ? JSON.stringify(errMsg) : errMsg);
         } finally {
             setLoading(false);
         }
@@ -164,10 +167,18 @@ function GroupDetail() {
             <h2>{group?.groupName || `Group #${id}`}</h2>
             {group?.ownerName && <p><strong>Owner:</strong> {group.ownerName}</p>}
 
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            {message && <p style={{ color: 'green' }}>{message}</p>}
+            {error && (
+                <p style={{ color: 'red' }}>
+                    {typeof error === 'object' ? JSON.stringify(error) : error}
+                </p>
+            )}
+            {message && (
+                <p style={{ color: 'green' }}>
+                    {typeof message === 'object' ? JSON.stringify(message) : message}
+                </p>
+            )}
 
-            {!isMember && !isOwner && currentUserId && (
+            {!isMember && !isOwner && activeToken && (
                 <div style={{ marginBottom: '20px' }}>
                     <button onClick={handleRequestJoin}>
                         Request to Join Group
@@ -181,8 +192,17 @@ function GroupDetail() {
             ) : (
                 <ul>
                     {group.members.map((member) => (
-                        <li key={member.userID}>
+                        <li key={member.userID} style={{ marginBottom: '6px' }}>
                             {member.username} {group.ownerID === member.userID ? '(Owner)' : ''}
+                            
+                            {isOwner && member.userID !== group.ownerID && (
+                                <button
+                                    onClick={() => handleRemoveMember(member.userID)}
+                                    style={{ marginLeft: '10px', color: 'red' }}
+                                >
+                                    Remove
+                                </button>
+                            )}
                         </li>
                     ))}
                 </ul>
