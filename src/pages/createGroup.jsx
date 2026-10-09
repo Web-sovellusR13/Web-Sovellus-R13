@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useUser } from '../context/useUser';
+import './createGroup.css'
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
