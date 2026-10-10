@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { useUser } from '../context/useUser';
+import './groupPage.css'
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -28,6 +29,7 @@ function GroupDetail() {
 
     const [group, setGroup] = useState(null);
     const [newMemberName, setNewMemberName] = useState('');
+    const [movies, setMovies] = useState([])
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
@@ -56,6 +58,27 @@ function GroupDetail() {
             fetchGroupData();
         }
     }, [id]);
+
+    useEffect(() => {
+        const getMovies = async () => {
+            try {
+                const movieResponses = await Promise.all(
+                    (group?.movies || []).map(async movieID => {
+                        const response = await axios.get(
+                            `${apiUrl}/api/movies/${movieID}`
+                        )
+                        return response.data
+                    })
+                )
+
+                setMovies(movieResponses)
+            } catch (error) {
+                console.error('Error fetching group movies:', error)
+            }
+        }
+
+        getMovies()
+    }, [group?.movies])
 
     const handleAddMember = async (e) => {
         e.preventDefault();
@@ -125,49 +148,71 @@ function GroupDetail() {
 }
 
     return (
-        <div style={{ padding: '20px' }}>
-            <h2>{group?.groupName || `Group #${id}`}</h2>
-            {group?.ownerName && <p><strong>Owner:</strong> {group.ownerName}</p>}
+        <div className="group-detail">
+            <div className="group-info">
+                <h2>{group?.groupName || `Group #${id}`}</h2>
+                {group?.ownerName && <p><strong>Owner:</strong> {group.ownerName}</p>}
 
-            {error && <p style={{ color: 'red' }}>{error}</p>}
+                {error && <p style={{ color: 'red' }}>{error}</p>}
 
-            <h3>Members</h3>
-            {!group?.members || group.members.length === 0 ? (
-                <p>No members in this group yet.</p>
-            ) : (
-                <ul>
-                    {group.members.map((member) => (
-                        <li key={member.userID}>
-                            {member.username} 
-                            {group.ownerID === member.userID ? '(Owner)' : ''}
-                            {group.ownerID === currentUserId && 
-                            member.userID !== group.ownerID && (
-                                <button onClick={() => handleRemoveMember(member.userID)}>
-                                    Remove
-                                </button>
-                            )}
-                        </li>
-                    ))}
-                </ul>
-            )}
+                <h3>Members</h3>
+                {!group?.members || group.members.length === 0 ? (
+                    <p>No members in this group yet.</p>
+                ) : (
+                    <ul>
+                        {group.members.map((member) => (
+                            <li key={member.userID}>
+                                {member.username} 
+                                {group.ownerID === member.userID ? '(Owner)' : ''}
+                                {group.ownerID === currentUserId && 
+                                member.userID !== group.ownerID && (
+                                    <button onClick={() => handleRemoveMember(member.userID)}>
+                                        Remove
+                                    </button>
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+                )}
 
-            <hr />
+                <hr />
 
-            <h3>Add Member to Group</h3>
-            <form onSubmit={handleAddMember}>
-                <input
-                    type="text"
-                    placeholder="Enter username..."
-                    value={newMemberName}
-                    onChange={(e) => setNewMemberName(e.target.value)}
-                    disabled={loading}
-                />
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Adding...' : 'Add Member'}
-                </button>
-            </form>
+                <h3>Add Member to Group</h3>
+                <form onSubmit={handleAddMember}>
+                    <input
+                        type="text"
+                        placeholder="Enter username..."
+                        value={newMemberName}
+                        onChange={(e) => setNewMemberName(e.target.value)}
+                        disabled={loading}
+                    />
+                    <button type="submit" disabled={loading}>
+                        {loading ? 'Adding...' : 'Add Member'}
+                    </button>
+                </form>
+            </div>
+            <div className="group-movie-section">
+                <h3>Movies</h3>
+
+                {movies.length === 0 ? (
+                    <p>No movies in this group yet.</p>
+                ) : (
+                    <div className="group-movies">
+                        {movies.map(movie => (
+                            <div className="movie-card" key={movie.id}>
+                                <img
+                                    className="movie-poster"
+                                    src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                                    alt={movie.title}
+                                />
+                                <h2>{movie.title}</h2>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
-    );
+    )
 }
 
 export default GroupDetail;
