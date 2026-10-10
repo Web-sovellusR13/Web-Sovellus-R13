@@ -15,6 +15,8 @@ function MovieDetails() {
     const [loading, setLoading] = useState(true)
     const [reviewText, setReviewText] = useState('')
     const [rating, setRating] = useState('')
+    const [groups, setGroups] = useState([])
+    const [selectedGroup, setSelectedGroup] = useState('')
 
     const addFavorite = async () => {
         try {
@@ -36,6 +38,41 @@ function MovieDetails() {
                 alert(error.response.data.error.message)
             } else {
                 alert(error)
+            }
+        }
+    }
+
+    const addMovieToGroup = async () => {
+        if (!selectedGroup) {
+            alert('Please select a group')
+            return
+        }
+
+        try {
+            const response = await axios.post(
+            `${apiUrl}/api/groups/${selectedGroup}/movies`,
+            { movieID: movie.id },
+            {
+                headers: {
+                Authorization: `Bearer ${user.token}`,
+                },
+            }
+            )
+
+            if (response.status === 200) {
+                alert('Movie is already in this group')
+            } else if (response.status === 201) {
+                alert('Movie added to group successfully')
+            }
+        } catch (error) {
+            if (error.response?.status === 401) {
+                alert('Please sign in to add a movie to a group')
+            } else if (error.response?.data?.error?.message) {
+                alert(error.response.data.error.message)
+            } else if (error.response?.data?.error) {
+                alert(error.response.data.error)
+            } else {
+                alert('Something went wrong')
             }
         }
     }
@@ -101,6 +138,24 @@ function MovieDetails() {
             })
     }, [movieId])
 
+    useEffect(() => {
+        if (!user?.token) {
+            return
+        }
+
+        axios.get(`${apiUrl}/api/groups/my-groups`, {
+            headers: {
+                Authorization: `Bearer ${user.token}`
+            }
+        })
+            .then(response => {
+                setGroups(response.data)
+            })
+            .catch(error => {
+                alert(error.response ? error.response.data : error)
+            })
+    }, [user])
+
     if (loading) {
         return <p>Loading movie...</p>
     }
@@ -126,9 +181,42 @@ function MovieDetails() {
                     <p>Release date: {movie.release_date}</p>
                     <p>Runtime: {movie.runtime} minutes</p>
                     <p>Genres: {movie.genres.map(genre => genre.name).join(', ')}</p>
-                    <button className='favButton' onClick={addFavorite}>
-                        Add favorite
-                    </button>
+                    <hr className="section-divider" />
+
+                    {user?.token && (
+                        <button className='favButton' onClick={addFavorite}>
+                            Add favorite
+                        </button>
+                    )}
+
+                    {user?.token && (
+                    <div className="group-form">
+                        <h3>Add movie to group</h3>
+
+                        {groups.length === 0 ? (
+                        <p>You don't belong to any groups yet.</p>
+                        ) : (
+                        <>
+                            <select
+                            value={selectedGroup}
+                            onChange={(event) => setSelectedGroup(event.target.value)}
+                            >
+                            <option value="">Select group</option>
+
+                            {groups.map((group) => (
+                                <option key={group.idGroup} value={group.idGroup}>
+                                {group.groupName}
+                                </option>
+                            ))}
+                            </select>
+
+                            <button onClick={addMovieToGroup}>
+                            Add to group
+                            </button>
+                        </>
+                        )}
+                    </div>
+                    )}
 
                     {user?.token ? (
                         <div className="review-form">

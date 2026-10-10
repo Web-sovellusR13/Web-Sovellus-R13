@@ -17,9 +17,19 @@
     object-fit: cover;
 }
 
+.section-divider {
+    border: none;
+    border-top: 0.5px solid #ccc;
+    margin: 25px 0;
+}
+
+.group-form select {
+  margin-right: 10px;
+}
+
 .review-card {
     padding: 1rem 0;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 0.5px solid #ccc;
 }
 
 .review-card h3 {

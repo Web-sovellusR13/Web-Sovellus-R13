@@ -155,10 +155,6 @@ export const getMyGroups = async (req, res, next) => {
 }
 
 export const addMovieToGroup = async (req, res, next) => {
-    console.log('REQ PARAMS:', req.params)
-    console.log('REQ BODY:', req.body)
-    console.log('REQ USER:', req.user)
-
     const { id: groupID } = req.params
     const { movieID } = req.body
     const userID = req.user.userId
@@ -175,7 +171,14 @@ export const addMovieToGroup = async (req, res, next) => {
         }
 
         const result = await insertMovieToGroup(groupID, movieID)
-        return res.status(201).json(result)
+        if (!result) {
+            return res.status(200).json({
+                message: 'Movie is already in this group'
+            })
+        }
+        return res.status(201).json({
+            message: 'Movie added to group successfully'
+        })
     } catch (error) {
         next(error)
     }
