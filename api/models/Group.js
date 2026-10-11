@@ -131,6 +131,42 @@ const removeMember = async (groupID, userID) => {
     return result.rows[0]
 }
 
+const selectGroupsByUser = async (userID) => {
+    const result = await pool.query(
+        `SELECT
+            groups."groupID" AS "idGroup",
+            groups.groupname AS "groupName"
+        FROM public.groups
+        JOIN public.members
+            ON groups."groupID" = members."groups_groupID"
+        WHERE members."user_userID" = $1`,
+        [userID]
+    )
+    return result.rows
+}
+
+const selectGroupMember = async (groupID, userID) => {
+    const result = await pool.query(
+        `SELECT *
+        FROM public.members
+        WHERE "groups_groupID" = $1
+        AND "user_userID" = $2`,
+        [groupID, userID]
+    )
+    return result.rows[0]
+}
+
+const insertMovieToGroup = async (groupID, movieID) => {
+    const result = await pool.query(
+        `INSERT INTO public.group_movies ("groupID", "movieID")
+        VALUES ($1, $2)
+        ON CONFLICT DO NOTHING
+        RETURNING *`,
+        [groupID, movieID]
+    )
+    return result.rows[0]
+}
+
 export {
     selectAllGroups,
     selectGroupById,
@@ -140,5 +176,8 @@ export {
     insertMember,
     selectGroupOwner,
     selectUserByUsername,
-    removeMember
+    removeMember,
+    selectGroupsByUser,
+    selectGroupMember,
+    insertMovieToGroup
 }

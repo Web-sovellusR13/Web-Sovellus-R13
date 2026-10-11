@@ -1,3 +1,18 @@
+import {
+    selectAllGroups,
+    selectGroupById,
+    selectGroupMembers,
+    selectGroupMovies,
+    insertGroup,
+    insertMember,
+    selectGroupOwner,
+    selectUserByUsername,
+    removeMember,
+    selectGroupsByUser,
+    selectGroupMember,
+    insertMovieToGroup
+} from '../models/Group.js'
+import { ApiError } from '../helper/ApiError.js'
 import { pool } from '../models/db.js'
 
 export const getGroups = async (req, res, next) => {
@@ -303,4 +318,46 @@ export const respondToJoinRequest = async (req, res, next) => {
   } catch (error) {
     next(error)
   }
+}
+
+export const getMyGroups = async (req, res, next) => {
+    try {
+        console.log('User from token:', req.user)
+        const userID = req.user.userId
+
+        const groups = await selectGroupsByUser(userID)
+        return res.status(200).json(groups)
+    } catch (error) {
+        next(error)
+    }
+}
+
+export const addMovieToGroup = async (req, res, next) => {
+    const { id: groupID } = req.params
+    const { movieID } = req.body
+    const userID = req.user.userId
+
+    if (!movieID) {
+        throw new ApiError('Movie ID is required', 400)
+    }
+
+    try{
+        const member = await selectGroupMember(groupID, userID)
+
+        if (!member) {
+            throw new ApiError('You are not a member of this group', 403)
+        }
+
+        const result = await insertMovieToGroup(groupID, movieID)
+        if (!result) {
+            return res.status(200).json({
+                message: 'Movie is already in this group'
+            })
+        }
+        return res.status(201).json({
+            message: 'Movie added to group successfully'
+        })
+    } catch (error) {
+        next(error)
+    }
 }

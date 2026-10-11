@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Link } from 'react-router-dom'
 import './groupList.css'
@@ -27,7 +27,7 @@ function GroupList() {
         <div className='groupList'>
             <div className='myHeader'>
                 <Link to='/createGroup'>Create a group</Link>
-                <h1>Your groups</h1>
+                <h1>Groups</h1>
                 <div className='groupContainer'>
                     {groups.map(group => (
                         <div key={group.idGroup} className='groupItem'>
