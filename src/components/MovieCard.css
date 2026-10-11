@@ -28,3 +28,9 @@
     font-size: 0.9rem;
     line-height: 1.4;
 }
+
+@media (prefers-color-scheme: dark) {
+    .movie-card {
+        background: #1a1a1a;
+    }
+}
