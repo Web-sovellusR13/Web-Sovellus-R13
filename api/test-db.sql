@@ -47,6 +47,15 @@ CREATE TABLE IF NOT EXISTS public.groups
     CONSTRAINT groupname UNIQUE (groupname)
 );
 
+CREATE TABLE IF NOT EXISTS public.group_requests (
+    id SERIAL PRIMARY KEY,
+    "user_userID" INT NOT NULL REFERENCES public.app_users("userID") ON DELETE CASCADE,
+    "groups_groupID" INT NOT NULL REFERENCES public.groups("groupID") ON DELETE CASCADE,
+    status VARCHAR(20) DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE("user_userID", "groups_groupID")
+);
+
 CREATE TABLE IF NOT EXISTS public.group_movies
 (
     "groupID" integer,
