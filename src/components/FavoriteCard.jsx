@@ -6,7 +6,6 @@ import './FavoriteCard.css'
 function FavoriteCard({ movie }) {
     const { openMovie } = useNavigation()
     const navigate = useNavigate()
-    const { user, setUser } = useUser()
 
 
     return (
