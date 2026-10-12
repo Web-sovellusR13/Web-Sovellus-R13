@@ -10,75 +10,40 @@ import {
     removeMember,
     selectGroupsByUser,
     selectGroupMember,
-    insertMovieToGroup
+    insertMovieToGroup,
+    insertGroupRequest,
+    selectPendingRequests,
+    selectUserByRequest,
+    updateRequestStatus
 } from '../models/Group.js'
 import { ApiError } from '../helper/ApiError.js'
-import { pool } from '../models/db.js'
 
 export const getGroups = async (req, res, next) => {
   try {
-    const result = await pool.query(`
-      SELECT 
-        "groupID" AS "idGroup", 
-        groupname AS "groupName", 
-        "ownerID"
-      FROM public.groups
-    `)
-    res.status(200).json(result.rows)
+    const result = await selectAllGroups()
+    res.status(200).json(result)
   } catch (error) {
     next(error)
   }
 }
 
 export const getGroupById = async (req, res, next) => {
-  const { id } = req.params
+  const groupID = req.params.id
 
   try {
-    const groupResult = await pool.query(
-      `
-      SELECT 
-        g."groupID" AS "idGroup", 
-        g.groupname AS "groupName", 
-        g."ownerID",
-        u.username AS "ownerName"
-      FROM public.groups g
-      JOIN public.app_users u ON g."ownerID" = u."userID"
-      WHERE g."groupID" = $1
-      `,
-      [id]
-    )
+    const groupResult = await selectGroupById(groupID)
 
-    if (groupResult.rows.length === 0) {
+    if (!groupResult) {
       return res.status(404).json({ error: 'Group not found' })
     }
 
-    const groupData = groupResult.rows[0]
-
-    const membersResult = await pool.query(
-      `
-      SELECT 
-        u."userID", 
-        u.username 
-      FROM public.members m
-      JOIN public.app_users u ON m."user_userID" = u."userID"
-      WHERE m."groups_groupID" = $1
-      `,
-      [id]
-    )
-
-    const moviesResult = await pool.query(
-      `
-      SELECT "movieID" 
-      FROM public.group_movies 
-      WHERE "groupID" = $1
-      `,
-      [id]
-    )
+    const membersResult = await selectGroupMembers(groupID)
+    const moviesResult = await selectGroupMovies(groupID)
 
     res.status(200).json({
-      ...groupData,
-      members: membersResult.rows,
-      movies: moviesResult.rows.map(m => m.movieID)
+      ...groupResult,
+      members: membersResult,
+      movies: moviesResult.map(m => m.movieID)
     })
   } catch (error) {
     next(error)
@@ -94,27 +59,9 @@ export const createGroup = async (req, res, next) => {
   }
 
   try {
-    const result = await pool.query(
-      `
-      INSERT INTO public.groups (groupname, "ownerID")
-      VALUES ($1, $2)
-      RETURNING "groupID" AS "idGroup", groupname AS "groupName", "ownerID"
-      `,
-      [groupName, ownerID]
-    )
-
-    const newGroupId = result.rows[0].idGroup
-
-    await pool.query(
-      `
-      INSERT INTO public.members ("user_userID", "groups_groupID")
-      VALUES ($1, $2)
-      ON CONFLICT DO NOTHING
-      `,
-      [ownerID, newGroupId]
-    )
-
-    res.status(201).json(result.rows[0])
+    const result = await insertGroup(groupName, ownerID)
+    await insertMember(ownerID, result.idGroup )
+    res.status(201).json(result)
   } catch (error) {
     if (error.code === '23505') {
       return res.status(400).json({ error: 'Group name already taken' })
@@ -124,7 +71,7 @@ export const createGroup = async (req, res, next) => {
 }
 
 export const addMember = async (req, res, next) => {
-  const { id: groupID } = req.params
+  const groupID = req.params.id
   const { username, requesterID } = req.body
 
   if (!username || !requesterID) {
@@ -132,39 +79,23 @@ export const addMember = async (req, res, next) => {
   }
 
   try {
-    const groupCheck = await pool.query(
-      `SELECT "ownerID" FROM public.groups WHERE "groupID" = $1`,
-      [groupID]
-    )
+    const groupResult = await selectGroupOwner(groupID)
 
-    if (groupCheck.rows.length === 0) {
+    if (!groupResult) {
       return res.status(404).json({ error: 'Group not found' })
     }
 
-    if (groupCheck.rows[0].ownerID !== parseInt(requesterID)) {
+    if (Number(groupResult.ownerID !== Number(requesterID))) {
       return res.status(403).json({ error: 'Only group owner can add members directly' })
     }
 
-    const userCheck = await pool.query(
-      `SELECT "userID" FROM public.app_users WHERE username = $1`,
-      [username]
-    )
+    const userResult = await selectUserByUsername(username)
 
-    if (userCheck.rows.length === 0) {
+    if (!userResult) {
       return res.status(404).json({ error: 'User not found' })
     }
 
-    const targetUserID = userCheck.rows[0].userID
-
-    await pool.query(
-      `
-      INSERT INTO public.members ("user_userID", "groups_groupID")
-      VALUES ($1, $2)
-      ON CONFLICT DO NOTHING
-      `,
-      [targetUserID, groupID]
-    )
-
+    await insertMember(userResult.userID, groupID)
     res.status(200).json({ message: `User ${username} added to the group` })
   } catch (error) {
     next(error)
@@ -172,43 +103,36 @@ export const addMember = async (req, res, next) => {
 }
 
 export const removeMemberFromGroup = async (req, res, next) => {
-  const { id: groupID, memberId } = req.params
-  const { requesterID } = req.body
+    const groupID = req.params.id
+    const memberId = req.params.memberId
+    const { requesterID } = req.body
 
   if (!requesterID) {
     return res.status(400).json({ error: 'requesterID is required' })
   }
 
   try {
-    const groupCheck = await pool.query(
-      `SELECT "ownerID" FROM public.groups WHERE "groupID" = $1`,
-      [groupID]
-    )
+    const groupResult = await selectGroupOwner(groupID)
 
-    if (groupCheck.rows.length === 0) {
+    if (!groupResult) {
       return res.status(404).json({ error: 'Group not found' })
     }
 
-    const ownerID = groupCheck.rows[0].ownerID
+    const ownerID = Number(groupResult.ownerID)
+    const requester = Number(requesterID)
+    const member = Number(memberId)
 
-    if (ownerID !== parseInt(requesterID) && parseInt(memberId) !== parseInt(requesterID)) {
+    if (ownerID !== requester && member !== requester) {
       return res.status(403).json({ error: 'Unauthorized to remove this member' })
     }
 
-    if (parseInt(memberId) === ownerID) {
+    if (member === ownerID) {
       return res.status(400).json({ error: 'Group owner cannot be removed from the group' })
     }
 
-    const deleteResult = await pool.query(
-      `
-      DELETE FROM public.members 
-      WHERE "groups_groupID" = $1 AND "user_userID" = $2
-      RETURNING *
-      `,
-      [groupID, memberId]
-    )
+    const deleteResult = await removeMember(groupID, memberId)
 
-    if (deleteResult.rows.length === 0) {
+    if (!deleteResult) {
       return res.status(404).json({ error: 'Member not found in this group' })
     }
 
@@ -219,27 +143,27 @@ export const removeMemberFromGroup = async (req, res, next) => {
 }
 
 export const leaveGroup = async (req, res, next) => {
-    const { id: groupID } = req.params
+    const groupID = req.params.id
     const userID = req.user.userId
 
     try {
-        const group = await selectGroupOwner(groupID)
+        const groupResult = await selectGroupOwner(groupID)
 
-        if (!group) {
+        if (!groupResult) {
             return res.status(404).json({
                 error: 'Group not found'
             })
         }
 
-        if (group.ownerID === userID) {
+        if (Number(groupResult.ownerID) === Number(userID)) {
             return res.status(400).json({
                 error: 'Group owner cannot leave the group'
             })
         }
 
-        const result = await removeMember(groupID, userID)
+        const deleteResult = await removeMember(groupID, userID)
 
-        if (!result) {
+        if (!deleteResult) {
             return res.status(404).json({
                 error: 'You are not a member of this group'
             })
@@ -255,7 +179,7 @@ export const leaveGroup = async (req, res, next) => {
 }
 
 export const requestToJoinGroup = async (req, res, next) => {
-  const { id: groupID } = req.params
+  const groupID = req.params.id
   const { userID } = req.body
 
   if (!userID) {
@@ -263,15 +187,7 @@ export const requestToJoinGroup = async (req, res, next) => {
   }
 
   try {
-    await pool.query(
-      `
-      INSERT INTO public.group_requests ("user_userID", "groups_groupID", status)
-      VALUES ($1, $2, 'pending')
-      ON CONFLICT DO NOTHING
-      `,
-      [userID, groupID]
-    )
-
+    await insertGroupRequest(userID, groupID)
     res.status(200).json({ message: 'Join request sent successfully' })
   } catch (error) {
     next(error)
@@ -279,22 +195,10 @@ export const requestToJoinGroup = async (req, res, next) => {
 }
 
 export const getPendingRequests = async (req, res, next) => {
-  const { id: groupID } = req.params
+  const groupID = req.params.id
 
   try {
-    const result = await pool.query(
-      `
-      SELECT 
-        r.id AS "requestId",
-        u."userID",
-        u.username
-      FROM public.group_requests r
-      JOIN public.app_users u ON r."user_userID" = u."userID"
-      WHERE r."groups_groupID" = $1 AND r.status = 'pending'
-      `,
-      [groupID]
-    )
-
+    const result = await selectPendingRequests(groupID)
     res.status(200).json(result.rows)
   } catch (error) {
     next(error)
@@ -310,45 +214,23 @@ export const respondToJoinRequest = async (req, res, next) => {
   }
 
   try {
-    const groupCheck = await pool.query(
-      `SELECT "ownerID" FROM public.groups WHERE "groupID" = $1`,
-      [groupID]
-    )
+    const groupResult = await selectGroupOwner(groupID)
 
-    if (groupCheck.rows.length === 0 || groupCheck.rows[0].ownerID !== parseInt(requesterID)) {
+    if (Number(groupResult.ownerID) !== Number(requesterID)) {
       return res.status(403).json({ error: 'Only group owner can respond to requests' })
     }
 
-    const requestQuery = await pool.query(
-      `SELECT "user_userID" FROM public.group_requests WHERE id = $1`,
-      [requestId]
-    )
+    const requestResult = await selectUserByRequest(requestId)
 
-    if (requestQuery.rows.length === 0) {
+    if (!requestResult) {
       return res.status(404).json({ error: 'Request not found' })
     }
 
-    const targetUserID = requestQuery.rows[0].user_userID
-
     if (action === 'approve') {
-      await pool.query(
-        `
-        INSERT INTO public.members ("user_userID", "groups_groupID")
-        VALUES ($1, $2)
-        ON CONFLICT DO NOTHING
-        `,
-        [targetUserID, groupID]
-      )
-
-      await pool.query(
-        `UPDATE public.group_requests SET status = 'approved' WHERE id = $1`,
-        [requestId]
-      )
+      await insertMember(requestResult.user_userID, groupID)
+      await updateRequestStatus(requestId, 'approved')
     } else {
-      await pool.query(
-        `UPDATE public.group_requests SET status = 'rejected' WHERE id = $1`,
-        [requestId]
-      )
+      await updateRequestStatus(requestId, 'rejected')
     }
 
     res.status(200).json({ message: `Request ${action}d successfully` })
@@ -359,18 +241,17 @@ export const respondToJoinRequest = async (req, res, next) => {
 
 export const getMyGroups = async (req, res, next) => {
     try {
-        console.log('User from token:', req.user)
         const userID = req.user.userId
 
-        const groups = await selectGroupsByUser(userID)
-        return res.status(200).json(groups)
+        const result = await selectGroupsByUser(userID)
+        return res.status(200).json(result)
     } catch (error) {
         next(error)
     }
 }
 
 export const addMovieToGroup = async (req, res, next) => {
-    const { id: groupID } = req.params
+    const groupID = req.params.id
     const { movieID } = req.body
     const userID = req.user.userId
 
