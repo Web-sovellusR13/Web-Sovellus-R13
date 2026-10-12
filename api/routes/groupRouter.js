@@ -11,15 +11,19 @@ import {
   addMovieToGroup,
   requestToJoinGroup,
   getPendingRequests,
-  respondToJoinRequest
+  respondToJoinRequest,
+  leaveGroup
 } from '../controllers/groupController.js'
 
 const router = Router()
 
 // Ryhmien hakeminen ja luominen
 router.get('/', getGroups)
-router.post('/', createGroup)
+router.post('/',auth, createGroup)
 router.get('/my-groups', auth, getMyGroups)
+
+// Ryhmästä poistuminen
+router.delete('/:id/members/me', auth, leaveGroup)
 
 // Yksittäisen ryhmän elokuvat ja jäsenet
 router.post('/:id/movies', auth, addMovieToGroup)
@@ -33,5 +37,6 @@ router.post('/:id/requests/:requestId', respondToJoinRequest)
 
 // Yksittäisen ryhmän hakeminen
 router.get('/:id', getGroupById)
+
 
 export default router
