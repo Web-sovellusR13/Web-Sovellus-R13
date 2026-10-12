@@ -86,7 +86,8 @@ export const getGroupById = async (req, res, next) => {
 }
 
 export const createGroup = async (req, res, next) => {
-  const { groupName, ownerID } = req.body
+  const { groupName } = req.body
+  const ownerID = req.user?.userId
 
   if (!groupName || !ownerID) {
     return res.status(400).json({ error: 'groupName and ownerID are required' })
@@ -215,6 +216,42 @@ export const removeMemberFromGroup = async (req, res, next) => {
   } catch (error) {
     next(error)
   }
+}
+
+export const leaveGroup = async (req, res, next) => {
+    const { id: groupID } = req.params
+    const userID = req.user.userId
+
+    try {
+        const group = await selectGroupOwner(groupID)
+
+        if (!group) {
+            return res.status(404).json({
+                error: 'Group not found'
+            })
+        }
+
+        if (group.ownerID === userID) {
+            return res.status(400).json({
+                error: 'Group owner cannot leave the group'
+            })
+        }
+
+        const result = await removeMember(groupID, userID)
+
+        if (!result) {
+            return res.status(404).json({
+                error: 'You are not a member of this group'
+            })
+        }
+
+        return res.status(200).json({
+            message: 'You have left the group'
+        })
+
+    } catch (error) {
+        next(error)
+    }
 }
 
 export const requestToJoinGroup = async (req, res, next) => {

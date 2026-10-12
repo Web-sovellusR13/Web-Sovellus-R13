@@ -126,6 +126,34 @@ function GroupDetail() {
         }
     };
 
+    const handleLeaveGroup = async () => {
+    const confirmed = window.confirm(
+        'Are you sure you want to leave this group?'
+    )
+        if (!confirmed) {
+            return
+        }
+        try {
+            await axios.delete(
+                `${apiUrl}/api/groups/${id}/members/me`,
+                {
+                headers: {
+                    Authorization: `Bearer ${activeToken}`
+                }
+            }
+        )
+
+         await fetchGroupData()
+
+        } catch (error) {          
+            setError(
+            error.response?.data?.error?.message ||
+            error.response?.data?.error ||
+            'Failed to leave group.'
+            )
+        }
+    }
+
     useEffect(() => {
         const getMovies = async () => {
             try {
@@ -232,6 +260,16 @@ function GroupDetail() {
                                         Remove
                                     </button>
                                 )}
+
+                                {!isOwner && member.userID === Number(currentUserId) && (
+                                    <button
+                                        onClick={handleLeaveGroup}
+                                        style={{ marginLeft: '10px', color: 'red' }}
+                                    >
+                                        Leave group
+                                    </button>
+                                )}
+
                             </li>
                         ))}
                     </ul>

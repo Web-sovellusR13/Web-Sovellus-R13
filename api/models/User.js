@@ -23,21 +23,83 @@ const deleteUser = async (userId) => {
   try {
     await client.query('BEGIN')
 
+    // Get groups owned by the user
+    const ownedGroupsResult = await client.query(
+      `SELECT "groupID"
+       FROM public.groups
+       WHERE "ownerID" = $1`,
+      [userId]
+    )
+
+    const ownedGroupIds = ownedGroupsResult.rows.map(
+      group => group.groupID
+    )
+
+    // Delete data belonging to groups owned by the user
+    for (const groupId of ownedGroupIds) {
+
+      // Delete join requests for the group
+      await client.query(
+        `DELETE FROM public.group_requests
+         WHERE "groups_groupID" = $1`,
+        [groupId]
+      )
+
+      // Delete members of the group
+      await client.query(
+        `DELETE FROM public.members
+         WHERE "groups_groupID" = $1`,
+        [groupId]
+      )
+
+      // Delete movies from the group
+      await client.query(
+        `DELETE FROM public.group_movies
+         WHERE "groupID" = $1`,
+        [groupId]
+      )
+
+      // Delete the group itself
+      await client.query(
+        `DELETE FROM public.groups
+         WHERE "groupID" = $1`,
+        [groupId]
+      )
+    }
+
+    // Remove user from groups owned by other users
+    await client.query(
+      `DELETE FROM public.members
+       WHERE "user_userID" = $1`,
+      [userId]
+    )
+
+    // Delete user's join requests
+    await client.query(
+      `DELETE FROM public.group_requests
+       WHERE "user_userID" = $1`,
+      [userId]
+    )
+
     // Delete user's favorites
     await client.query(
-      'DELETE FROM favorites WHERE "userID" = $1',
+      `DELETE FROM public.favorites
+       WHERE "userID" = $1`,
       [userId]
     )
 
     // Delete user's reviews
     await client.query(
-      'DELETE FROM reviews WHERE "userID" = $1',
+      `DELETE FROM public.reviews
+       WHERE "userID" = $1`,
       [userId]
     )
 
-    // Delete user
+    // Finally delete the user
     const result = await client.query(
-      'DELETE FROM app_users WHERE "userID" = $1 RETURNING *',
+      `DELETE FROM public.app_users
+       WHERE "userID" = $1
+       RETURNING *`,
       [userId]
     )
 
