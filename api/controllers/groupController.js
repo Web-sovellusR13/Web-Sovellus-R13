@@ -199,7 +199,7 @@ export const getPendingRequests = async (req, res, next) => {
 
   try {
     const result = await selectPendingRequests(groupID)
-    res.status(200).json(result.rows)
+    res.status(200).json(result)
   } catch (error) {
     next(error)
   }
