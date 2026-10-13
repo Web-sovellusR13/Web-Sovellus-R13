@@ -3,14 +3,15 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useUser } from '../context/useUser';
 import './groupPage.css'
+import FavoriteCard from '../components/FavoriteCard';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
 function GroupDetail() {
     const { id } = useParams();
     const { user, token } = useUser();
-
     const navigate = useNavigate()
+
     const [group, setGroup] = useState(null);
     const [pendingRequests, setPendingRequests] = useState([]);
     const [newMemberName, setNewMemberName] = useState('');
@@ -325,16 +326,12 @@ function GroupDetail() {
                     {movies.length === 0 ? (
                         <p>No movies in this group yet.</p>
                     ) : (
-                        <div className="group-movies">
+                        <div className='group-movies'>
                             {movies.map(movie => (
-                                <div className="movie-card" key={movie.id}>
-                                    <img
-                                        className="movie-poster"
-                                        src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                                        alt={movie.title}
-                                    />
-                                    <h2>{movie.title}</h2>
-                                </div>
+                                <FavoriteCard
+                                    key={movie.id}
+                                    movie={movie}
+                                />
                             ))}
                         </div>
                     )}
