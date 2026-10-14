@@ -25,7 +25,9 @@ CREATE TABLE IF NOT EXISTS public.reviews
     "userID" integer NOT NULL,
     "movieID" integer NOT NULL,
     review character varying(500) NOT NULL,
-    rating numeric(3, 1) NOT NULL,
+    rating integer NOT NULL,
+    "time" TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
     PRIMARY KEY ("revID")
 );
 
@@ -52,21 +54,27 @@ CREATE TABLE IF NOT EXISTS public.members
     PRIMARY KEY ("user_userID", "groups_groupID")
 );
 
-CREATE TABLE IF NOT EXISTS public.requests
+CREATE TABLE IF NOT EXISTS public.group_requests 
 (
-    "reqID" serial NOT NULL,
-    "user_userID" integer NOT NULL,
-    "groups_groupID" integer NOT NULL,
-    status character(20) NOT NULL,
-    PRIMARY KEY ("reqID")
+    id SERIAL PRIMARY KEY,
+    "user_userID" INT NOT NULL REFERENCES public.app_users("userID") ON DELETE CASCADE,
+    "groups_groupID" INT NOT NULL REFERENCES public.groups("groupID") ON DELETE CASCADE,
+    status VARCHAR(20) DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE("user_userID", "groups_groupID")
 );
 
 ALTER TABLE IF EXISTS public.reviews
     ADD FOREIGN KEY ("userID")
-    REFERENCES public.app_users ("userID") MATCH SIMPLE
+    REFERENCES public.app_users ("userID")
+    MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION
     NOT VALID;
+
+ALTER TABLE public.reviews
+    ADD CONSTRAINT chk_rating_range
+    CHECK (rating >= 1 AND rating <= 5);
 
 
 ALTER TABLE IF EXISTS public.groups
@@ -101,24 +109,8 @@ ALTER TABLE IF EXISTS public.members
     NOT VALID;
 
 
-ALTER TABLE IF EXISTS public.requests
-    ADD FOREIGN KEY ("user_userID")
-    REFERENCES public.app_users ("userID") MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
-
-
-ALTER TABLE IF EXISTS public.requests
-    ADD FOREIGN KEY ("groups_groupID")
-    REFERENCES public.groups ("groupID") MATCH SIMPLE
-    ON UPDATE NO ACTION
-    ON DELETE NO ACTION
-    NOT VALID;
-
-
-ALTER TABLE requests
-	ADD CONSTRAINT chk_request_status
-	CHECK (status IN ('pending','approved','rejected'));
+ALTER TABLE public.group_requests 
+ADD CONSTRAINT unique_user_group_request 
+UNIQUE ("user_userID", "groups_groupID");
 
 END;
