@@ -3,6 +3,8 @@ REST API: [View the documentation](https://documenter.getpostman.com/view/505989
 
 UI Design: [View the project UI design](https://app.moqups.com/sqYWmA4pyb9uVKSll0jLnCf2q5s6oIJV/view/page/ad64222d5)
 
+Database class diagram and time tracking documentation can be found in the documents folder.
+
 | #  | Feature                  |      |
 | -- | ------------------------ | ---- |
 | 1  | Responsiveness           | Done |
